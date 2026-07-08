@@ -75,10 +75,49 @@ class DynamicQrcode {
         
         $this->qrcode_instance->addQrcode($input_data, $data_to_db, $data_to_qrcode);
     }
-    
+
+    /**
+     * Batch-safe variant used by batch_qrcode.php: creates one dynamic qr code from a
+     * CSV row (filename + link) with sane defaults, returning a result array
+     * (['ok' => bool, 'id'|'error' => ...]) instead of redirecting/exiting.
+     */
+    public function addQrcodeBatchRow($filename, $link, $id_owner) {
+        $filename = trim((string) $filename);
+        $link = trim((string) $link);
+
+        if ($filename === '') {
+            return ['ok' => false, 'error' => 'Filename is required.'];
+        }
+
+        if ($link === '' || strlen($link) > 500) {
+            return ['ok' => false, 'error' => 'Link is required and must be at most 500 characters.'];
+        }
+
+        $data_to_db['id_owner'] = $id_owner !== '' ? $id_owner : NULL;
+        $data_to_db['filename'] = htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
+        $data_to_db['created_at'] = date('Y-m-d H:i:s');
+        $data_to_db['link'] = htmlspecialchars($link, ENT_QUOTES, 'UTF-8');
+        $data_to_db['created_by'] = $_SESSION['user_id'];
+        $data_to_db['format'] = 'png';
+        $data_to_db['identifier'] = randomString(rand(5, 8));
+        $data_to_db['qrcode'] = $data_to_db['filename'].'.'.$data_to_db['format'];
+
+        $data_to_qrcode = READ_PATH.$data_to_db['identifier'];
+
+        $input_data = [
+            'level' => 'L',
+            'size' => 200,
+            'foreground' => '#000000',
+            'background' => '#ffffff',
+            'frame_text' => '',
+        ];
+
+        return $this->qrcode_instance->addQrcodeBatch($input_data, $data_to_db, $data_to_qrcode);
+    }
+
     /**
      * Edit qr code
-     * 
+     *
      */
     public function editQrcode($input_data) {
         $this->validateLink($input_data['link'] ?? '');

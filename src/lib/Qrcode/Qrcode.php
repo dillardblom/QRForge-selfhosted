@@ -57,6 +57,46 @@ class Qrcode {
         return $format;
     }
 
+    /**
+     * Renders an optional text label below the qr code. Only supported for raster
+     * formats (png/jpg/jpeg/gif) via GD; a no-op for svg/svgbw/eps.
+     */
+    private function addFrameText($path, $format, $text) {
+        $text = trim((string) $text);
+        $loaders = ['png' => 'imagecreatefrompng', 'jpg' => 'imagecreatefromjpeg', 'jpeg' => 'imagecreatefromjpeg', 'gif' => 'imagecreatefromgif'];
+        $savers = ['png' => 'imagepng', 'jpg' => 'imagejpeg', 'jpeg' => 'imagejpeg', 'gif' => 'imagegif'];
+
+        if ($text === '' || !isset($loaders[$format]) || !is_file($path)) {
+            return;
+        }
+
+        $source = @$loaders[$format]($path);
+        if ($source === false) {
+            return;
+        }
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+        $padding = 30;
+
+        $canvas = imagecreatetruecolor($width, $height + $padding);
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        $black = imagecolorallocate($canvas, 0, 0, 0);
+        imagefill($canvas, 0, 0, $white);
+        imagecopy($canvas, $source, 0, 0, 0, 0, $width, $height);
+
+        $font = 5;
+        $text_width = imagefontwidth($font) * strlen($text);
+        $x = max(0, (int) (($width - $text_width) / 2));
+        $y = $height + (int) (($padding - imagefontheight($font)) / 2);
+        imagestring($canvas, $font, $x, $y, $text, $black);
+
+        $savers[$format]($canvas, $path);
+
+        imagedestroy($source);
+        imagedestroy($canvas);
+    }
+
     public function getQrcode($id) {
         $db = getDbInstance();
 
@@ -125,14 +165,16 @@ class Qrcode {
             $content = file_get_contents($url);
             
             $filename = SAVED_QRCODE_DIRECTORY.$data_to_db['filename'].'.'.$data_to_db['format'];
-        
+
             try{
                 file_put_contents($filename, $content);
             }
             catch(Exception $e){
                 $this->failure($e->getMessage());
             }
-            
+
+            $this->addFrameText($filename, $data_to_db['format'], $input_data['frame_text'] ?? '');
+
             // If you want you can customi<e qr code with logo
             //$this->addLogo($data_to_db['qrcode'], $options['optionlogo']);
               
@@ -152,8 +194,74 @@ class Qrcode {
     }
     
     /**
+     * Batch-safe variant of addQrcode(): generates and stores the qr code but returns a
+     * result array (['ok' => bool, 'id'|'error' => ...]) instead of redirecting/exiting,
+     * so batch_qrcode.php can create many codes in one request. Deliberately does not
+     * reuse addQrcode()/sanitizeFilename()/validateFormat(), since those call failure()
+     * (redirect + exit) which would abort the whole batch after the first bad row.
+     */
+    public function addQrcodeBatch($input_data, $data_to_db, $data_to_qrcode) {
+        $filename = trim((string) $data_to_db['filename']);
+        $format = strtolower((string) $data_to_db['format']);
+
+        if ($filename === '' || strlen($filename) > 45) {
+            return ['ok' => false, 'error' => 'Filename must be between 1 and 45 characters.'];
+        }
+
+        if (preg_match('#[\\/\\\\]#', $filename) || strpos($filename, '..') !== false || strpos($filename, "\0") !== false) {
+            return ['ok' => false, 'error' => 'Filename cannot contain path separators.'];
+        }
+
+        if (!in_array($format, self::ALLOWED_FORMATS, true)) {
+            return ['ok' => false, 'error' => 'Invalid qr code format.'];
+        }
+
+        $data_to_db['filename'] = $filename;
+        $data_to_db['format'] = $format;
+
+        $path = SAVED_QRCODE_DIRECTORY.$filename.'.'.$format;
+
+        if (file_exists($path)) {
+            return ['ok' => false, 'error' => 'A qr code with this filename already exists.'];
+        }
+
+        $options = $this->setOptions($input_data);
+        $url =
+            'https://api.qrserver.com/v1/create-qr-code/?data='.
+            $data_to_qrcode.
+            '&amp;&size='.$options['size'].'x'.$options['size'].
+            '&ecc='.$options['errorCorrectionLevel'].
+            '&margin=0&color='.$options['foreground'].
+            '&bgcolor='.$options['background'].
+            '&qzone=2'.
+            '&format='.$format;
+
+        $content = @file_get_contents($url);
+        if ($content === false) {
+            return ['ok' => false, 'error' => 'Could not generate the qr code image.'];
+        }
+
+        if (@file_put_contents($path, $content) === false) {
+            return ['ok' => false, 'error' => 'Could not write the qr code file.'];
+        }
+
+        $this->addFrameText($path, $format, $input_data['frame_text'] ?? '');
+
+        $db = getDbInstance();
+        $last_id = $db->insert($this->table, $data_to_db);
+
+        if (!$last_id) {
+            return ['ok' => false, 'error' => 'Insert failed: ' . $db->getLastError()];
+        }
+
+        audit_log('qrcode_created', $this->table, $last_id);
+
+        return ['ok' => true, 'id' => $last_id];
+    }
+
+    /**
      * Edit qr code
-     * 
+     *
      */
     public function editQrcode($input_data, $data_to_db) {
         $db = getDbInstance();

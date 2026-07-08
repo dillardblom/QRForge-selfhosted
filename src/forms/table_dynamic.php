@@ -89,6 +89,9 @@
                     <?php endif; ?>
                     <!-- DOWNLOAD -->
                     <a href="qrcode_image.php?type=dynamic&id=<?php echo $row['id']; ?>&download=1" class="btn btn-primary"><i class="fa fa-download"></i></a>
+
+                    <!-- COPY TO CLIPBOARD -->
+                    <button type="button" class="btn btn-secondary copy-qr-btn" data-qr-src="qrcode_image.php?type=dynamic&id=<?php echo $row['id']; ?>" title="Copy image to clipboard"><i class="fa fa-copy"></i></button>
                 </td>
             </tr>
             <?php endforeach; ?>

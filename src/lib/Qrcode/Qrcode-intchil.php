@@ -52,11 +52,11 @@ class Qrcode {
         $filename = trim((string) $filename);
 
         if ($filename === '' || strlen($filename) > 45) {
-            $this->failure('Filename must be between 1 and 45 characters.');
+            throw new \InvalidArgumentException('Filename must be between 1 and 45 characters.');
         }
 
         if (preg_match('#[\\/\\\\]#', $filename) || strpos($filename, '..') !== false || strpos($filename, "\0") !== false) {
-            $this->failure('Filename cannot contain path separators.');
+            throw new \InvalidArgumentException('Filename cannot contain path separators.');
         }
 
         return $filename;
@@ -66,10 +66,50 @@ class Qrcode {
         $format = strtolower((string) $format);
 
         if (!in_array($format, self::ALLOWED_FORMATS, true)) {
-            $this->failure('Invalid qr code format.');
+            throw new \InvalidArgumentException('Invalid qr code format.');
         }
 
         return $format;
+    }
+
+    /**
+     * Renders an optional text label below the qr code. Only supported for raster
+     * formats (png/jpg/jpeg/gif) via GD; a no-op for svg/svgbw/eps.
+     */
+    private function addFrameText($path, $format, $text) {
+        $text = trim((string) $text);
+        $loaders = ['png' => 'imagecreatefrompng', 'jpg' => 'imagecreatefromjpeg', 'jpeg' => 'imagecreatefromjpeg', 'gif' => 'imagecreatefromgif'];
+        $savers = ['png' => 'imagepng', 'jpg' => 'imagejpeg', 'jpeg' => 'imagejpeg', 'gif' => 'imagegif'];
+
+        if ($text === '' || !isset($loaders[$format]) || !is_file($path)) {
+            return;
+        }
+
+        $source = @$loaders[$format]($path);
+        if ($source === false) {
+            return;
+        }
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+        $padding = 30;
+
+        $canvas = imagecreatetruecolor($width, $height + $padding);
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        $black = imagecolorallocate($canvas, 0, 0, 0);
+        imagefill($canvas, 0, 0, $white);
+        imagecopy($canvas, $source, 0, 0, 0, 0, $width, $height);
+
+        $font = 5;
+        $text_width = imagefontwidth($font) * strlen($text);
+        $x = max(0, (int) (($width - $text_width) / 2));
+        $y = $height + (int) (($padding - imagefontheight($font)) / 2);
+        imagestring($canvas, $font, $x, $y, $text, $black);
+
+        $savers[$format]($canvas, $path);
+
+        imagedestroy($source);
+        imagedestroy($canvas);
     }
 
     public function getQrcode($id) {
@@ -121,6 +161,36 @@ class Qrcode {
      * We save into db the url of qrcode image
      */
     public function addQrcode($input_data, $data_to_db, $data_to_qrcode) {
+        try {
+            $last_id = $this->renderAndStore($input_data, $data_to_db, $data_to_qrcode);
+        } catch (\Throwable $e) {
+            $this->failure($e->getMessage());
+        }
+
+        audit_log('qrcode_created', $this->table, $last_id);
+        $this->success('Qr code added successfully!');
+    }
+
+    /**
+     * Batch-safe variant of addQrcode(): generates and stores the qr code but returns a
+     * result array (['ok' => bool, 'id'|'error' => ...]) instead of redirecting/exiting,
+     * so batch_qrcode.php can create many codes in one request.
+     */
+    public function addQrcodeBatch($input_data, $data_to_db, $data_to_qrcode) {
+        try {
+            $last_id = $this->renderAndStore($input_data, $data_to_db, $data_to_qrcode);
+            audit_log('qrcode_created', $this->table, $last_id);
+            return ['ok' => true, 'id' => $last_id];
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Core qr code rendering + storage, shared by addQrcode() and addQrcodeBatch().
+     * Throws instead of calling failure() so batch processing can catch and continue.
+     */
+    private function renderAndStore($input_data, $data_to_db, $data_to_qrcode) {
         $options = $this->setOptions($input_data);
 
         $data_to_db['filename'] = $this->sanitizeFilename($data_to_db['filename']);
@@ -324,25 +394,25 @@ class Qrcode {
             }
             catch(Exception $e)
             {
-                $this->failure($e->getMessage());
+                throw new \RuntimeException($e->getMessage());
             }
+
+            $this->addFrameText($filename, $fileExt, $input_data['frame_text'] ?? '');
 
             // If you want you can customi<e qr code with logo
             //$this->addLogo($data_to_db['qrcode'], $options['optionlogo']);
-              
+
             $db = getDbInstance();
             $last_id = $db->insert($this->table, $data_to_db);
         }
         else
-            $this->failure('You cannot create a new qr code with an existing name on the server!');
-        
-        if ($last_id){
-            audit_log('qrcode_created', $this->table, $last_id);
-            $this->success('Qr code added successfully!');
+            throw new \RuntimeException('You cannot create a new qr code with an existing name on the server!');
+
+        if (!$last_id) {
+            throw new \RuntimeException('Insert failed: ' . $db->getLastError());
         }
-        else {
-            $this->failure('Insert failed: ' . $db->getLastError());
-        }
+
+        return $last_id;
     }
 
     /**
@@ -353,7 +423,11 @@ class Qrcode {
         $db = getDbInstance();
         $old_qrcode = $this->getQrcode($input_data["id"]);
 
-        $data_to_db['filename'] = $this->sanitizeFilename($data_to_db['filename']);
+        try {
+            $data_to_db['filename'] = $this->sanitizeFilename($data_to_db['filename']);
+        } catch (\InvalidArgumentException $e) {
+            $this->failure($e->getMessage());
+        }
         $data_to_db['qrcode'] = $data_to_db['filename'].'.'.$old_qrcode["format"];
 
         if(!file_exists(SAVED_QRCODE_DIRECTORY.$data_to_db['filename'].'.'.$old_qrcode["format"]) || $data_to_db['filename'] == $input_data["old_filename"]){

@@ -88,6 +88,14 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
                     <option value="eps">EPS</option>
                 </select>
     </div>
+
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="frame_text">Frame text</label>
+            <input type="text" name="frame_text" value="" placeholder="e.g. Scan me" maxlength="60" class="form-control" id="frame_text">
+            <small class="form-text text-muted">Optional label rendered below the code. Only applies to PNG/JPEG/GIF, not SVG/EPS.</small>
+        </div>
+    </div>
   </div>
 </div>
 

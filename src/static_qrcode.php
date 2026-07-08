@@ -77,6 +77,12 @@ if($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["edit"])) {
 
         case '2fa':      $static_qrcode_instance->twofaQrcode($_POST['algorithms'], $_POST['secret'], rawurlencode($_POST['label']), rawurlencode($_POST['issuer']));
             break;
+
+        case 'applink':  $static_qrcode_instance->applinkQrcode($_POST['platform'], $_POST['scheme'], $_POST['path'], $_POST['package'] ?? '', $_POST['fallback_url'] ?? '');
+            break;
+
+        case 'bluetooth': $static_qrcode_instance->bluetoothQrcode($_POST['device_name'], $_POST['mac_address']);
+            break;
     }
 }
 ?>

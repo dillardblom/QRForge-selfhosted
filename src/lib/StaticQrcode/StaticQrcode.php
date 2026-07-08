@@ -378,6 +378,68 @@ class StaticQrcode {
             $this->requiredFieldsError();
     }
 
+    /**
+     * create a qr code of type "applink" (mobile app deep link)
+     * @string platform -> required, "android" (intent:// link with optional fallback) or "generic" (plain custom-scheme URI)
+     * @string scheme -> required, e.g. "myapp"
+     * @string path -> required, e.g. "open?ref=123" (without the scheme prefix)
+     * @string package -> required when platform is "android" (Android package name, e.g. com.example.app)
+     * @string fallback_url -> optional, Play Store/web fallback used by the Android intent link
+     */
+    public function applinkQrcode($platform, $scheme, $path, $package, $fallback_url)
+    {
+        $is_android = $platform === 'android';
+
+        if ($scheme != NULL && $path != NULL && (!$is_android || $package != NULL)) {
+            if ($is_android) {
+                $this->sData = 'intent://' . $path . '#Intent;scheme=' . $scheme . ';package=' . $package;
+                if (!empty($fallback_url)) {
+                    $this->sData .= ';S.browser_fallback_url=' . rawurlencode($fallback_url);
+                }
+                $this->sData .= ';end';
+            } else {
+                $this->sData = $scheme . '://' . $path;
+            }
+
+            $this->sContent = '<strong>Platform:</strong> ' . ($is_android ? 'Android (intent)' : 'Generic') . '<br>';
+            $this->sContent .= '<strong>Scheme:</strong> ' . $scheme . '<br>';
+            $this->sContent .= '<strong>Path:</strong> ' . $path;
+
+            if ($is_android) {
+                $this->sContent .= '<br><strong>Package:</strong> ' . $package;
+            }
+
+            if (!empty($fallback_url)) {
+                $this->sContent .= '<br><strong>Fallback URL:</strong> ' . $fallback_url;
+            }
+
+            $this->addQrcode("applink");
+        } else {
+            $this->requiredFieldsError();
+        }
+    }
+
+    /**
+     * create a qr code of type "bluetooth" (device pairing info)
+     * @string device_name -> required
+     * @string mac_address -> required
+     *
+     * Note: unlike WIFI:/vCard there is no OS-native "scan to pair" convention for
+     * Bluetooth, so this is purely informational - whoever scans it still has to pair
+     * the device manually via their Bluetooth settings using the name/address shown.
+     */
+    public function bluetoothQrcode($device_name, $mac_address)
+    {
+        if ($device_name != NULL && $mac_address != NULL) {
+            $this->sData = 'BT:N:' . $device_name . ';M:' . $mac_address . ';';
+            $this->sContent = '<strong>Device name:</strong> ' . $device_name . '<br>' . '<strong>MAC address:</strong> ' . $mac_address;
+
+            $this->addQrcode("bluetooth");
+        } else {
+            $this->requiredFieldsError();
+        }
+    }
+
     public function getQrcode($id) {
         return $this->qrcode_instance->getQrcode($id);
     }
@@ -410,6 +472,7 @@ class StaticQrcode {
 
         $input_data["foreground"] = $_POST['foreground'];
         $input_data["background"] = $_POST['background'];
+        $input_data["frame_text"] = $_POST['frame_text'] ?? '';
 
         $data_to_qrcode = urlencode($this->sData);
 

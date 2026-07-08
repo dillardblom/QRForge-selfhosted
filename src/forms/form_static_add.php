@@ -44,6 +44,12 @@
                   <li class="nav-item">
                     <a class="nav-link" data-toggle="pill" href="#twofa" role="tab" aria-controls="custom-tabs-four-settings" aria-selected="false">2FA <i class="fa fa-key"></i></a>
                   </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-toggle="pill" href="#applink" role="tab" aria-controls="custom-tabs-four-settings" aria-selected="false">App Link <i class="fas fa-mobile-alt"></i></a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-toggle="pill" href="#bluetooth" role="tab" aria-controls="custom-tabs-four-settings" aria-selected="false">Bluetooth <i class="fab fa-bluetooth-b"></i></a>
+                  </li>
                 </ul>
             </div>
               <div class="card-body">
@@ -88,7 +94,13 @@
                         <?php include BASE_PATH . '/forms/static/bitcoin.php'; ?>  
                     </div>
                     <div class="tab-pane fade" id="twofa" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
-                        <?php include BASE_PATH . '/forms/static/2fa.php'; ?>  
+                        <?php include BASE_PATH . '/forms/static/2fa.php'; ?>
+                    </div>
+                    <div class="tab-pane fade" id="applink" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                        <?php include BASE_PATH . '/forms/static/applink.php'; ?>
+                    </div>
+                    <div class="tab-pane fade" id="bluetooth" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                        <?php include BASE_PATH . '/forms/static/bluetooth.php'; ?>
                     </div>
                 </div>
               </div>

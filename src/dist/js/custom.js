@@ -500,3 +500,23 @@
     return false;
   });
 })(jQuery)
+// Copy a qr code image straight to the clipboard (Fase 3 UX feature).
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.copy-qr-btn').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      const icon = btn.querySelector('i');
+      const originalClass = icon.className;
+
+      try {
+        const response = await fetch(btn.getAttribute('data-qr-src'));
+        const blob = await response.blob();
+        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+
+        icon.className = 'fa fa-check';
+        setTimeout(function () { icon.className = originalClass; }, 1500);
+      } catch (err) {
+        alert('Could not copy this image to the clipboard (your browser may not support this image format for clipboard access): ' + err.message);
+      }
+    });
+  });
+});

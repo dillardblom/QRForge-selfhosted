@@ -56,6 +56,12 @@
                   <p>Add new</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="./batch_qrcode.php" <?php echo (CURRENT_PAGE == 'batch_qrcode.php') ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Batch create (CSV)</p>
+                </a>
+              </li>
               <?php endif; ?>
             </ul>
           </li>
