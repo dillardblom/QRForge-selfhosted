@@ -33,6 +33,14 @@
              </p>
            </a>
          </li>
+         <li class="nav-item">
+           <a href="./scan_qrcode.php" <?php echo (CURRENT_PAGE == 'scan_qrcode.php') ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
+             <i class="nav-icon fas fa-camera"></i>
+             <p>
+               Scan qr code
+             </p>
+           </a>
+         </li>
           <?php if ($_SESSION['type'] !== 'user' || !empty($_SESSION['can_view_dynamic'])): ?>
           <li <?php echo ((substr(CURRENT_PAGE, 0, 19) == 'dynamic_qrcodes.php') || (substr(CURRENT_PAGE, 0, 18) == 'dynamic_qrcode.php')) ? ' class="nav-item has-treeview menu-open"' : ' class="nav-item has-treeview"'; ?>>
             <a href="#" <?php echo ((substr(CURRENT_PAGE, 0, 19) == 'dynamic_qrcodes.php') || (substr(CURRENT_PAGE, 0, 18) == 'dynamic_qrcode.php')) ? ' class="nav-link active"' : ' class="nav-link"'; ?>>

@@ -2,6 +2,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="csrf-token" content="<?php echo csrf_token(); ?>">
+  <meta name="theme-color" content="#007bff">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="dist/img/icon-192.png">
 
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">

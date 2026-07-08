@@ -29,3 +29,9 @@
 <script src="plugins/daterangepicker/daterangepicker.js"></script>
 <!-- Overlay scrollbar -->
 <script type="text/javascript" src="plugins/overlayScrollbars/js/OverlayScrollbars.js"></script>
+<!-- PWA service worker -->
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+    }
+</script>

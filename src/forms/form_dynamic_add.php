@@ -35,7 +35,7 @@
         
             <div class="col-6 col-md-3">
                 <label for="size">Size (px)</label>
-                <select name="size" class="form-control">
+                <select name="size" id="size" class="form-control">
                     <option value="100">100</option>
                     <option value="200">200</option>
                     <option value="300">300</option>
@@ -51,13 +51,47 @@
         </div>
     </div>
 
+    <div class="col-sm-12 mb-2">
+        <div class="row">
+            <div class="col-6 col-md-3">
+                <button type="button" id="random_style_btn" class="btn btn-outline-secondary btn-block">
+                    <i class="fa fa-dice"></i> Random style
+                </button>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label for="preset_select">Load preset</label>
+                <div class="input-group">
+                    <select id="preset_select" class="form-control">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button type="button" id="preset_delete_btn" class="btn btn-outline-secondary" title="Delete selected preset"><i class="fa fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label for="preset_name">Save as preset</label>
+                <div class="input-group">
+                    <input type="text" id="preset_name" class="form-control" placeholder="Preset name" maxlength="50">
+                    <div class="input-group-append">
+                        <button type="button" id="preset_save_btn" class="btn btn-outline-secondary"><i class="fa fa-save"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dist/js/qrcode-style-tools.js?nocache=<?php print rand();?>"></script>
+
 <!-- Its use is not recommended. Read the documentation
     <div class="form-group">
         <label for="logo">Logo</label>
         <?php //include 'logo.php' ?>
     </div>
     -->
-    
+
     <div class="col-sm-4">
         <div class="form-group">
             <label for="link">URL *</label>
@@ -93,6 +127,14 @@
                     <option value="svg">SVG</option>
                     <option value="eps">EPS</option>
                 </select>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="frame_text">Frame text</label>
+            <input type="text" name="frame_text" value="" placeholder="e.g. Scan me" maxlength="60" class="form-control" id="frame_text">
+            <small class="form-text text-muted">Optional label rendered below the code. Only applies to PNG/JPEG/GIF, not SVG/EPS.</small>
+        </div>
     </div>
   </div>
 </div>
