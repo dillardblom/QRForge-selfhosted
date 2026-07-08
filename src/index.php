@@ -4,31 +4,22 @@ require_once 'includes/auth_validate.php';
 
 $db = getDbInstance();
 
-// Reports/statistieken zijn voor de 'user'-rol altijd volledig zichtbaar (net als 'super'),
-// ongeacht de can_view_static/can_view_dynamic toggles die alleen de qrcode-lijsten regelen.
-$is_full_visibility = in_array($_SESSION['type'], ['super', 'user'], true);
+// Full visibility (super, or a company-wide 'user' account) vs. scoped to one admin's
+// own codes (an admin, or a 'user' account created by that admin).
+$is_full_visibility = qr_has_full_visibility();
 
 //Get Dynamic qr code rows
-if(!$is_full_visibility) {
-    $db->where("id_owner", $_SESSION['user_id']);
-    $db->orWhere ("id_owner", NULL, 'IS');
-}
+qr_apply_owner_scope($db);
 $numQrcode_dynamic = $db->getValue("dynamic_qrcodes", "count(*)");
 
 //Get Static qr code rows
-if(!$is_full_visibility) {
-    $db->where("id_owner", $_SESSION['user_id']);
-    $db->orWhere ("id_owner", NULL, 'IS');
-}
+qr_apply_owner_scope($db);
 $numQrcode_static = $db->getValue("static_qrcodes", "count(*)");
 
 $total = $numQrcode_dynamic + $numQrcode_static;
 
 //Get Total scan
-if(!$is_full_visibility) {
-    $db->where("id_owner", $_SESSION['user_id']);
-    $db->orWhere ("id_owner", NULL, 'IS');
-}
+qr_apply_owner_scope($db);
 $numScan = $db->getOne("dynamic_qrcodes", "sum(scan) as numScan");
 
                                                 /* CREATED CHART */
@@ -36,7 +27,7 @@ $numScan = $db->getOne("dynamic_qrcodes", "sum(scan) as numScan");
 
 //Get the number of DYNAMIC qr code created in 7 days and total scan
 if(!$is_full_visibility)
-    $createdQrcode_dynamic = $db->query("select `created_at`, `scan` from " . DATABASE_PREFIX . "dynamic_qrcodes where `created_at` > curdate()-7 AND (`id_owner`= " . $_SESSION['user_id'] . " OR `id_owner` IS NULL);");
+    $createdQrcode_dynamic = $db->query("select `created_at`, `scan` from " . DATABASE_PREFIX . "dynamic_qrcodes where `created_at` > curdate()-7 AND (`id_owner`= " . (int) qr_scope_owner_id() . " OR `id_owner` IS NULL);");
 else
     $createdQrcode_dynamic = $db->query("select `created_at`, `scan` from ".DATABASE_PREFIX."dynamic_qrcodes where `created_at` > curdate()-7;");
 
@@ -59,7 +50,7 @@ foreach ($createdQrcode_dynamic as $row) {
                                                 /* SCAN CHART */
 //Get the number of STATIC qr code created in 7 days
 if(!$is_full_visibility)
-    $createdQrcode_static = $db->query("select `created_at` from " . DATABASE_PREFIX . "static_qrcodes where `created_at` > curdate()-7 AND (`id_owner`=" . $_SESSION['user_id'] . " OR `id_owner` IS NULL);");
+    $createdQrcode_static = $db->query("select `created_at` from " . DATABASE_PREFIX . "static_qrcodes where `created_at` > curdate()-7 AND (`id_owner`=" . (int) qr_scope_owner_id() . " OR `id_owner` IS NULL);");
 else
     $createdQrcode_static = $db->query("select `created_at` from ".DATABASE_PREFIX."static_qrcodes where `created_at` > curdate()-7;");
 

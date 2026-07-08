@@ -1,5 +1,5 @@
--- Fase 2: read-only 'user' rol met twee zichtbaarheids-toggles.
--- type='user' vereist geen schemawijziging (varchar(10), geen enum-constraint).
+-- Fase 2: read-only 'user' role with two visibility toggles.
+-- type='user' requires no schema change (varchar(10), no enum constraint).
 
 SET @db := DATABASE();
 

@@ -5,8 +5,8 @@ require_once BASE_PATH . '/lib/Users/Users.php';
 
 $user_instance = new Users();
 
-if ($_SESSION['type'] !== 'super')
-    $user_instance->failure('Only a "super admin" account can access the admin listing page', 'Location: index.php');
+if (!in_array($_SESSION['type'], ['super', 'admin'], true))
+    $user_instance->failure('Only "super admin" and "admin" accounts can access the user management page', 'Location: index.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify_or_die();
@@ -16,6 +16,13 @@ $edit = false;
 if($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["edit"]) && $_GET["edit"] == "true" && isset($_GET["id"])) {
     $edit = true;
     $user = $user_instance->getUser($_GET["id"]);
+
+    // An admin may only open the edit form for their own 'user' accounts.
+    if ($_SESSION['type'] === 'admin' && (
+        $user['type'] !== 'user' || (int) $user['owner_admin_id'] !== (int) $_SESSION['user_id']
+    )) {
+        $user_instance->failure('You are not allowed to edit this user', 'Location: users.php');
+    }
 }
 
 if($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["del_id"])) {

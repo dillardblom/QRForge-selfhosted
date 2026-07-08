@@ -87,7 +87,7 @@
                 </ul>
             </li>
             <?php endif; ?>
-          <?php if ($_SESSION['type'] === 'super'): ?>
+          <?php if (in_array($_SESSION['type'], ['super', 'admin'], true)): ?>
           <li class="nav-item">
             <a href="./users.php" <?php echo ((substr(CURRENT_PAGE, 0, 15) == 'users.php') || (substr(CURRENT_PAGE, 0, 14) == 'user.php')) ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
                 <i class="fas fa-users nav-icon"></i>

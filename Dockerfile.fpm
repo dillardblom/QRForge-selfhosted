@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 RUN if [ "$(grep '^VERSION_ID=' /etc/os-release | cut -d '=' -f 2 | tr -d '"')" -eq "9" ]; then \
         sed -i -e 's/deb.debian.org/archive.debian.org/g' \
@@ -13,6 +13,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -q \
     && DEBIAN_FRONTEND=noninteractive apt-get install -qq -y \
       curl \
+      git \
       libzip-dev \
       libjpeg62-turbo-dev \
       libpng-dev \
@@ -21,6 +22,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -q \
     && install-php-extensions \
       gd \
       gettext \
+      imagick \
       intl \
       mysqli \
       opcache \
@@ -41,8 +43,8 @@ RUN cd /opt \
 
 RUN mkdir -p /opt && chmod 777 /opt
 WORKDIR /opt
-# Zie Dockerfile: vastgezet op 5.0.5, want 6.0.0+ vereist PHP >= 8.4.
-RUN git clone --branch 5.0.5 --depth 1 https://github.com/chillerlan/php-qrcode.git \
+# See Dockerfile: pinned to a specific release tag instead of an unpinned clone of master.
+RUN git clone --branch 6.0.1 --depth 1 https://github.com/chillerlan/php-qrcode.git \
         && chmod -R 777 ./php-qrcode
 RUN cp ./php-qrcode/composer.json /var/www/html/composer.json
 RUN cp -R ./php-qrcode/src /var/www/html/
@@ -52,8 +54,13 @@ RUN composer update
 COPY ./src ./
 RUN chown -R www-data:www-data /var/www/html \
     && find /var/www/html -type f -exec chmod 644 {} \; \
-    && find /var/www/html -type d -exec chmod 755 {} \; \
-    && chmod -R 775 /var/www/html/saved_qrcode
+    && find /var/www/html -type d -exec chmod 755 {} \;
+
+# Qr code storage lives outside the document root so files can only be reached through
+# the authenticated qrcode_image.php / qrcode_zip_download.php endpoints.
+RUN mkdir -p /var/www/qrcode-storage/zip \
+    && chown -R www-data:www-data /var/www/qrcode-storage \
+    && chmod -R 775 /var/www/qrcode-storage
 
 EXPOSE 9000
 CMD ["php-fpm"]

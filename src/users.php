@@ -6,14 +6,21 @@ require_once BASE_PATH . '/lib/Users/Users.php';
 $db = getDbInstance();
 $users = new Users();
 
-if ($_SESSION['type'] !== 'super')
-    $users->failure('Only a "super admin" account can access the admin listing page', 'Location: index.php');
+if (!in_array($_SESSION['type'], ['super', 'admin'], true))
+    $users->failure('Only "super admin" and "admin" accounts can access the user management page', 'Location: index.php');
 
 $select = array('id', 'username', 'type');
 $search_fields = array('username');
 require_once BASE_PATH . '/includes/search_order.php';
 $page = filter_input(INPUT_GET, 'page', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? 1;
 $db->pageLimit = 15;
+
+// An admin only sees the read-only 'user' accounts they created themselves.
+if ($_SESSION['type'] === 'admin') {
+    $db->where('owner_admin_id', $_SESSION['user_id']);
+    $db->where('type', 'user');
+}
+
 $rows = $db->arraybuilder()->paginate('users', $page, $select);
 $total_pages = $db->totalPages;
 ?>

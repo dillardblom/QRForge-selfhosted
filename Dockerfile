@@ -1,4 +1,4 @@
-FROM php:8.3
+FROM php:8.4
 
 RUN if [ "$(grep '^VERSION_ID=' /etc/os-release | cut -d '=' -f 2 | tr -d '"')" -eq "9" ]; then \
         sed -i -e 's/deb.debian.org/archive.debian.org/g' \
@@ -51,16 +51,12 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -q \
       sockets \
       xsl \
       zip \
+      imagick \
     " \
     && case "$PHP_VERSION" in \
       5.6.*) PHP_EXTENSIONS="$PHP_EXTENSIONS mcrypt mysql";; \
       7.0.*|7.1.*) PHP_EXTENSIONS="$PHP_EXTENSIONS mcrypt";; \
     esac \
-    # Install Imagick from master on PHP >= 8.3, because imagick 3.7.0 broke on latest PHP releases and Imagick maintainers don't care to tag a newer release
-    && if [ $(php -r 'echo PHP_VERSION_ID;') -lt 80300 ]; then \
-      PHP_EXTENSIONS="$PHP_EXTENSIONS imagick"; \
-      else PHP_EXTENSIONS="$PHP_EXTENSIONS https://api.github.com/repos/Imagick/imagick/tarball/28f27044e435a2b203e32675e942eb8de620ee58"; \
-    fi \
     && install-php-extensions $PHP_EXTENSIONS \
     && if command -v a2enmod; then a2enmod rewrite; fi
 
@@ -86,10 +82,10 @@ RUN docker-php-ext-install sockets && docker-php-ext-enable sockets
 
 RUN mkdir -p /opt && chmod 777 /opt
 WORKDIR /opt
-# Vastgezet op 5.0.5 (laatste 5.x-release): vanaf 6.0.0 vereist de library PHP >= 8.4,
-# terwijl deze image op PHP 8.3 draait. Een ongepinde clone van master is bovendien
-# een reproduceerbaarheids-/supply-chain-risico (build kan zonder waarschuwing breken).
-RUN git clone --branch 5.0.5 --depth 1 https://github.com/chillerlan/php-qrcode.git \
+# Pinned to a specific release tag instead of an unpinned clone of master, which is a
+# reproducibility/supply-chain risk (the build can break silently when upstream moves on,
+# as happened when master started requiring PHP 8.4 while this image was still on 8.3).
+RUN git clone --branch 6.0.1 --depth 1 https://github.com/chillerlan/php-qrcode.git \
         && chmod -R 777 ./php-qrcode
 RUN cp ./php-qrcode/composer.json /var/www/html/composer.json
 RUN mkdir -p /var/www/html/test && chmod 777 /var/www/html/test
@@ -100,5 +96,10 @@ WORKDIR /var/www/html
 RUN composer update
 COPY ./src ./
 RUN chmod 755 *;
+
+# Qr code storage lives outside the document root so files can only be reached through
+# the authenticated qrcode_image.php / qrcode_zip_download.php endpoints.
+RUN mkdir -p /var/www/qrcode-storage/zip && chmod -R 777 /var/www/qrcode-storage
+
 EXPOSE 80
 CMD ["php", "-S", "0.0.0.0:80"]

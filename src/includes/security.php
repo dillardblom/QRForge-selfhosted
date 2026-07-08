@@ -144,6 +144,49 @@ function qr_is_login_locked_out($username) {
 }
 
 /**
+ * Compute the owner-scope for a freshly authenticated user row (see qr_scope_owner_id()
+ * below for the meaning of the returned value). Call once at login and store the result
+ * in $_SESSION['scope_owner_id'].
+ */
+function qr_compute_scope_owner_id($user_row) {
+    if ($user_row['type'] === 'admin') {
+        return (int) $user_row['id'];
+    }
+
+    if ($user_row['type'] === 'user' && !empty($user_row['owner_admin_id'])) {
+        return (int) $user_row['owner_admin_id'];
+    }
+
+    return null;
+}
+
+/**
+ * Owner-scope for the qr code lists/reports, set at login time in $_SESSION['scope_owner_id']:
+ * - null: full visibility (super, or a company-wide 'user' account created by super)
+ * - int:  restricted to codes owned by this admin id (an admin's own account, or a
+ *         'user' account created by that admin)
+ */
+function qr_scope_owner_id() {
+    return $_SESSION['scope_owner_id'] ?? null;
+}
+
+function qr_has_full_visibility() {
+    return qr_scope_owner_id() === null;
+}
+
+/**
+ * Apply the current session's owner scope to a MysqliDb query builder in place.
+ * No-op when the session has full visibility.
+ */
+function qr_apply_owner_scope($db) {
+    $scope_owner_id = qr_scope_owner_id();
+    if ($scope_owner_id !== null) {
+        $db->where('id_owner', $scope_owner_id);
+        $db->orWhere('id_owner', NULL, 'IS');
+    }
+}
+
+/**
  * Audit log
  */
 function audit_log($action, $target_type = null, $target_id = null) {

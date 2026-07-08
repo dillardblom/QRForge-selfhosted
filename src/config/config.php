@@ -2,8 +2,12 @@
 //Note: This file should be included first in every php page.
 require_once ('environment.php');
 
+// Never display errors/warnings/deprecations in the response body: besides leaking
+// internal file paths, it can inject output before session_start() runs and break
+// login entirely (seen with PHP 8.4's new deprecation notices). Log them instead.
 error_reporting(E_ALL);
-ini_set('display_errors', 'On');
+ini_set('display_errors', 'Off');
+ini_set('log_errors', 'On');
 define('BASE_PATH', dirname(dirname(__FILE__)));
 define('CURRENT_PAGE', basename($_SERVER['REQUEST_URI']));
 define('SCRIPT_NAME', ltrim(dirname($_SERVER['SCRIPT_NAME']), '/'));
@@ -17,10 +21,10 @@ require_once BASE_PATH . '/lib/MysqliDb/MysqliDb.php';
 require_once BASE_PATH . '/helpers/helpers.php';
 
 /* SAVED QR CODES */
-//You can change the folder where the qr code will be saved
-define('SAVED_QRCODE_FOLDER', './saved_qrcode/');
-define('SAVED_QRCODE_DIRECTORY', BASE_PATH.'/saved_qrcode/');
-define('SAVED_QRCODE_URL', base_url(). SCRIPT_FOLDER .'/saved_qrcode/');
+// Storage lives outside the document root so files can only be reached through the
+// authenticated qrcode_image.php / qrcode_zip_download.php endpoints, never as a direct
+// static URL. See db/migrations and the "saved_qrcode" hardening note in the OSS repo.
+define('SAVED_QRCODE_DIRECTORY', dirname(BASE_PATH).'/qrcode-storage/');
 
 //You can change the page name for the redirect and the search parameter (the default is "id")
 define('READ_PATH', base_url().'/read.php?id=');

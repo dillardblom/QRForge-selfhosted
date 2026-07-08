@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password_changed_at` datetime DEFAULT NULL,
   `can_view_static` tinyint(1) NOT NULL DEFAULT 0,
   `can_view_dynamic` tinyint(1) NOT NULL DEFAULT 0,
+  `owner_admin_id` int(25) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
@@ -60,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `static_qrcodes` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=0 ;
 
--- Security hardening (Fase 1): rate limiting op login pogingen
+-- Security hardening (Fase 1): rate limiting on login attempts
 CREATE TABLE IF NOT EXISTS `login_attempts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
@@ -72,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `login_attempts` (
   KEY `ip_attempted_at` (`ip_address`, `attempted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Security hardening (Fase 1): audit log van gevoelige acties
+-- Security hardening (Fase 1): audit log of sensitive actions
 CREATE TABLE IF NOT EXISTS `audit_log` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(25) DEFAULT NULL,

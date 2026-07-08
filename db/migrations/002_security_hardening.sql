@@ -1,7 +1,7 @@
--- Fase 1 security hardening migratie.
--- Voer uit tegen een bestaande database (gebruikt de originele
--- giandonatoinverso/php-dynamic-qr-code-db image of een oudere init.sql).
--- Kolommen/tabellen worden alleen toegevoegd als ze nog niet bestaan.
+-- Fase 1 security hardening migration.
+-- Run against an existing database (using the original
+-- giandonatoinverso/php-dynamic-qr-code-db image or an older init.sql).
+-- Columns/tables are only added if they don't already exist.
 
 SET @db := DATABASE();
 
@@ -23,8 +23,8 @@ SET @sql := IF(@col_exists = 0,
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- Bestaand superadmin account met het fabriekswachtwoord (superadmin/superadmin)
--- moet bij eerstvolgende login het wachtwoord wijzigen.
+-- An existing superadmin account with the factory password (superadmin/superadmin)
+-- must change its password on next login.
 UPDATE `users`
 SET `must_change_password` = 1
 WHERE `username` = 'superadmin'

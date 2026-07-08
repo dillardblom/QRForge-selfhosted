@@ -68,7 +68,7 @@
                 <td><?php echo htmlspecialchars($row['type']); ?></td>
                 <td><?php echo htmlspecialchars_decode($row['content']); ?></td>
                 <td>
-                    <?php echo '<img src="'.SAVED_QRCODE_FOLDER.htmlspecialchars($row['qrcode']).'" width="100" height="100">'; ?>
+                    <?php echo '<img src="qrcode_image.php?type=static&id='.$row['id'].'" width="100" height="100">'; ?>
                 </td>
                 <td>
                     <?php if (!$is_readonly_user): ?>
@@ -84,7 +84,7 @@
                     ><i class="fas fa-trash"></i></a>
                     <?php endif; ?>
                     <!-- DOWNLOAD -->
-                    <a href="<?php echo SAVED_QRCODE_FOLDER.htmlspecialchars($row['qrcode']); ?>" class="btn btn-primary" download><i class="fa fa-download"></i></a>
+                    <a href="qrcode_image.php?type=static&id=<?php echo $row['id']; ?>&download=1" class="btn btn-primary"><i class="fa fa-download"></i></a>
                 </td>
             </tr>
             <?php endforeach; ?>

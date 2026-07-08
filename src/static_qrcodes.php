@@ -18,11 +18,9 @@ require_once BASE_PATH . '/includes/search_order.php';
 $page = filter_input(INPUT_GET, 'page', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? 1;
 $db->pageLimit = 15;
 
-// 'user' ziet, net als 'super', alle codes (heeft zelf geen eigen codes om op te scopen).
-if($_SESSION['type'] === 'admin') {
-    $db->where("id_owner", $_SESSION['user_id']);
-    $db->orWhere ("id_owner", NULL, 'IS');
-}
+// Scoped to one admin's own codes for an admin (or a 'user' created by that admin);
+// full visibility for super and company-wide 'user' accounts.
+qr_apply_owner_scope($db);
 
 $rows = $db->arraybuilder()->paginate('static_qrcodes', $page, $select);
 $total_pages = $db->totalPages;

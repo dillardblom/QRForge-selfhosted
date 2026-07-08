@@ -13,7 +13,7 @@ class Users
     }
 
     /**
-     * Server-side validatie van username/type. Geeft een foutmelding terug (string) of null als geldig.
+     * Server-side validation of username/type. Returns an error message (string) or null if valid.
      */
     private function validateUsernameAndType($username, $type) {
         if (!is_string($username) || strlen($username) < 3 || strlen($username) > 50) {
@@ -57,6 +57,24 @@ class Users
         return $db->get(DATABASE_PREFIX.'users');
     }
 
+    /**
+     * True if the logged-in admin is allowed to manage (edit/delete) this user record.
+     * Super can always manage everyone.
+     */
+    private function canManage($target_user) {
+        if ($_SESSION['type'] === 'super') {
+            return true;
+        }
+
+        if ($_SESSION['type'] === 'admin') {
+            return $target_user !== null
+                && $target_user['type'] === 'user'
+                && (int) $target_user['owner_admin_id'] === (int) $_SESSION['user_id'];
+        }
+
+        return false;
+    }
+
     public function getUser($id) {
         $db = getDbInstance();
 
@@ -70,12 +88,27 @@ class Users
     }
     
     /**
-     * Add user
+     * Add user.
+     *
+     * A 'super' account can create any type freely (owner_admin_id stays NULL: company-wide).
+     * An 'admin' account can only create their own read-only 'user' accounts
+     * (type is forced to 'user', owner_admin_id is forced to their own id).
      */
     public function addUser($input_data) {
         $db = getDbInstance();
 
-        $validation_error = $this->validateUsernameAndType($input_data['username'] ?? '', $input_data['type'] ?? '');
+        $requested_type = $input_data['type'] ?? '';
+        $owner_admin_id = null;
+
+        if ($_SESSION['type'] === 'admin') {
+            $requested_type = 'user';
+            $owner_admin_id = $_SESSION['user_id'];
+        } elseif ($_SESSION['type'] !== 'super') {
+            header('HTTP/1.1 403 Forbidden', true, 403);
+            exit('403 Forbidden');
+        }
+
+        $validation_error = $this->validateUsernameAndType($input_data['username'] ?? '', $requested_type);
         if ($validation_error !== null) {
             $this->failure($validation_error, 'Location: user.php');
         }
@@ -86,7 +119,8 @@ class Users
 
         $data_to_db["username"] = $input_data["username"];
         $data_to_db['password'] = password_hash($input_data['password'], PASSWORD_DEFAULT);
-        $data_to_db["type"] = $input_data["type"];
+        $data_to_db["type"] = $requested_type;
+        $data_to_db['owner_admin_id'] = $owner_admin_id;
         $data_to_db['can_view_static'] = !empty($input_data['can_view_static']) ? 1 : 0;
         $data_to_db['can_view_dynamic'] = !empty($input_data['can_view_dynamic']) ? 1 : 0;
 
@@ -105,18 +139,30 @@ class Users
     }
     
     /**
-     * Edit user
-     * 
+     * Edit user.
+     *
+     * An 'admin' may only edit their own 'user' accounts (checked via canManage()) and
+     * cannot change the type away from 'user'. A 'super' account can edit anyone freely.
      */
     public function editUser($input_data) {
         $db = getDbInstance();
+
+        $db->where('id', $input_data['id']);
+        $target = $db->getOne('users');
+
+        if (!$this->canManage($target)) {
+            header('HTTP/1.1 403 Forbidden', true, 403);
+            exit('403 Forbidden');
+        }
 
         $query_string = http_build_query(array(
             'id' => $input_data["id"],
             'edit' => "true",
         ));
 
-        $validation_error = $this->validateUsernameAndType($input_data['username'] ?? '', $input_data['type'] ?? '');
+        $requested_type = $_SESSION['type'] === 'admin' ? 'user' : ($input_data['type'] ?? '');
+
+        $validation_error = $this->validateUsernameAndType($input_data['username'] ?? '', $requested_type);
         if ($validation_error !== null) {
             $this->failure($validation_error, 'Location: user.php?'.$query_string);
         }
@@ -125,6 +171,7 @@ class Users
             $this->failure('Password must be at least 10 characters long.', 'Location: user.php?'.$query_string);
         }
 
+        $db = getDbInstance();
         $db->where('username', $input_data['username']);
         $db->where('id', $input_data["id"], '!=');
         $row = $db->getOne('users');
@@ -134,11 +181,11 @@ class Users
         }
 
         $data_to_db["username"] = $input_data["username"];
-        $data_to_db["type"] = $input_data["type"];
+        $data_to_db["type"] = $requested_type;
         $data_to_db['can_view_static'] = !empty($input_data['can_view_static']) ? 1 : 0;
         $data_to_db['can_view_dynamic'] = !empty($input_data['can_view_dynamic']) ? 1 : 0;
 
-        // Alleen wachtwoord overschrijven als er een nieuwe waarde is opgegeven.
+        // Only overwrite the password if a new value was submitted.
         if (!empty($input_data['password'])) {
             $data_to_db['password'] = password_hash($input_data['password'], PASSWORD_DEFAULT);
         }
@@ -152,17 +199,22 @@ class Users
         } else
             $this->failure('Failed to update User: ' . $db->getLastError());
     }
-    
+
     /**
-     * Delete user
-     * 
+     * Delete user.
+     *
+     * An 'admin' may only delete their own 'user' accounts; 'super' can delete anyone.
      */
     public function deleteUser($id) {
-        if($_SESSION['type']!='super'){
-            header('HTTP/1.1 401 Unauthorized', true, 401);
-            exit("401 Unauthorized");
+        $db = getDbInstance();
+        $db->where('id', $id);
+        $target = $db->getOne('users');
+
+        if (!$this->canManage($target)) {
+            header('HTTP/1.1 403 Forbidden', true, 403);
+            exit('403 Forbidden');
         }
-        
+
         $db = getDbInstance();
         $db->where('id', $id);
         $stat = $db->delete('users');

@@ -46,22 +46,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($params as $param) {
             $db->where('id', $param);
-            if ($_SESSION['type'] === 'admin') {
-                $db->where('id_owner', $_SESSION['user_id']);
-                $db->orWhere('id_owner', NULL, 'IS');
-            }
+            qr_apply_owner_scope($db);
             $row = $db->getOne("{$type}_qrcodes");
             if ($row !== NULL) {
-                $files[] = SAVED_QRCODE_FOLDER . $row['qrcode'];
+                $files[] = SAVED_QRCODE_DIRECTORY . $row['qrcode'];
             }
         }
 
         $zip = new ZipArchive();
-        $uniqid = uniqid();
-        $relative_dir = SAVED_QRCODE_FOLDER . 'zip/qrcodes_' . $uniqid . '.zip';
-        @unlink($relative_dir);
-        $url_path = SAVED_QRCODE_URL . 'zip/qrcodes_' . $uniqid . '.zip';
-        $zip->open($relative_dir, ZipArchive::CREATE);
+        $zip_filename = 'qrcodes_' . uniqid() . '.zip';
+        $zip_path = SAVED_QRCODE_DIRECTORY . 'zip/' . $zip_filename;
+        @unlink($zip_path);
+        $zip->open($zip_path, ZipArchive::CREATE);
 
         foreach ($files as $file) {
             $download_file = @file_get_contents($file, true);
@@ -70,10 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $zip->close();
 
+        // Proof-of-generation: only this session may download this specific zip file.
+        $_SESSION['generated_zips'][] = $zip_filename;
+
         audit_log('bulk_download', $type, implode(',', $params));
 
         echo json_encode([
-            'data' => $url_path,
+            'data' => 'qrcode_zip_download.php?file=' . rawurlencode($zip_filename),
             'status' => 200
         ]);
         exit();

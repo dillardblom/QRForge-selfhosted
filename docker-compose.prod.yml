@@ -4,11 +4,10 @@ services:
     restart: "unless-stopped"
     ports:
       - "80:80"
-      # 443 pas openzetten zodra SSL-certificaten zijn gemount (bv. via certbot-volume
-      # of een losse reverse proxy zoals Caddy/Traefik ervoor). Zie infra-fase van het plan.
+      # Only open 443 once SSL certificates are mounted (e.g. via a certbot volume,
+      # or a separate reverse proxy like Caddy/Traefik in front). See the infra phase of the plan.
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - php_dynamic_qrcode_saved_qrcode_data:/var/www/html/saved_qrcode:ro
     depends_on:
       - php-dynamic-qrcode
     networks:
@@ -22,19 +21,19 @@ services:
     environment:
       TYPE: "docker"
       QRCODE_GENERATOR: "${QRCODE_GENERATOR:-internal-chillerlan.qrcode}"
-      BASE_URL: "${BASE_URL:?zet BASE_URL in .env, bv. https://qr.ensembia.com}"
+      BASE_URL: "${BASE_URL:?set BASE_URL in .env, e.g. https://qr.ensembia.com}"
       DATABASE_HOST: "php-dynamic-qrcode-db"
       DATABASE_PORT: "3306"
       DATABASE_NAME: "${DATABASE_NAME:-qrcode}"
       DATABASE_USER: "${DATABASE_USER:-qrcode}"
-      DATABASE_PASSWORD: "${DATABASE_PASSWORD:?zet DATABASE_PASSWORD in .env}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD:?set DATABASE_PASSWORD in .env}"
       DATABASE_PREFIX: "${DATABASE_PREFIX:-}"
       DATABASE_CHARSET: "${DATABASE_CHARSET:-utf8}"
     depends_on:
       php-dynamic-qrcode-db:
         condition: service_healthy
     volumes:
-      - php_dynamic_qrcode_saved_qrcode_data:/var/www/html/saved_qrcode
+      - php_dynamic_qrcode_saved_qrcode_data:/var/www/qrcode-storage
     networks:
       - php-dynamic-qrcode-network
 
@@ -45,10 +44,10 @@ services:
       - php_dynamic_qrcode_db_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?zet MYSQL_ROOT_PASSWORD in .env}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}"
       MYSQL_DATABASE: "${DATABASE_NAME:-qrcode}"
       MYSQL_USER: "${DATABASE_USER:-qrcode}"
-      MYSQL_PASSWORD: "${DATABASE_PASSWORD:?zet DATABASE_PASSWORD in .env}"
+      MYSQL_PASSWORD: "${DATABASE_PASSWORD:?set DATABASE_PASSWORD in .env}"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s

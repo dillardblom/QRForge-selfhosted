@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 		$_SESSION['must_change_password'] = !empty($row['must_change_password']);
 		$_SESSION['can_view_static'] = !empty($row['can_view_static']);
 		$_SESSION['can_view_dynamic'] = !empty($row['can_view_dynamic']);
+		$_SESSION['scope_owner_id'] = qr_compute_scope_owner_id($row);
 		$_SESSION['last_activity'] = time();
 
 		audit_log('login_success');
