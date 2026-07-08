@@ -1,6 +1,5 @@
 <?php
-session_start();
-require_once 'config/config.php';
+require_once 'includes/bootstrap.php';
 require_once BASE_PATH . '/includes/auth_validate.php';
 require_once BASE_PATH . '/lib/DynamicQrcode/DynamicQrcode.php';
 

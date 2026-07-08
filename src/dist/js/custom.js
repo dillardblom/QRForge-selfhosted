@@ -470,6 +470,9 @@
       data: JSON.stringify(data),
       dataType: "json",
       contentType: 'application/json',
+      headers: {
+        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+      },
       success: (res) => {
         if (res.status == 200) {
           if(data["action"] === "download") {

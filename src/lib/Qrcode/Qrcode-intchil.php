@@ -20,6 +20,8 @@ class Qrcode {
     private string $table;
     private string $redirect_url;
 
+    const ALLOWED_FORMATS = ['png', 'gif', 'jpeg', 'jpg', 'svg', 'svgbw', 'eps'];
+
     /**
      *
      */
@@ -41,6 +43,33 @@ class Qrcode {
      */
     public function __destruct()
     {
+    }
+
+    /**
+     * Voorkomt path traversal / arbitrary file write via een gemanipuleerde bestandsnaam.
+     */
+    private function sanitizeFilename($filename) {
+        $filename = trim((string) $filename);
+
+        if ($filename === '' || strlen($filename) > 45) {
+            $this->failure('Filename must be between 1 and 45 characters.');
+        }
+
+        if (preg_match('#[\\/\\\\]#', $filename) || strpos($filename, '..') !== false || strpos($filename, "\0") !== false) {
+            $this->failure('Filename cannot contain path separators.');
+        }
+
+        return $filename;
+    }
+
+    private function validateFormat($format) {
+        $format = strtolower((string) $format);
+
+        if (!in_array($format, self::ALLOWED_FORMATS, true)) {
+            $this->failure('Invalid qr code format.');
+        }
+
+        return $format;
     }
 
     public function getQrcode($id) {
@@ -93,6 +122,9 @@ class Qrcode {
      */
     public function addQrcode($input_data, $data_to_db, $data_to_qrcode) {
         $options = $this->setOptions($input_data);
+
+        $data_to_db['filename'] = $this->sanitizeFilename($data_to_db['filename']);
+        $data_to_db['format'] = $this->validateFormat($data_to_db['format']);
 
         $outputInterface = QRGdImagePNG::class;
         $imageFormat = strtolower($data_to_db['format']);
@@ -305,21 +337,23 @@ class Qrcode {
             $this->failure('You cannot create a new qr code with an existing name on the server!');
         
         if ($last_id){
+            audit_log('qrcode_created', $this->table, $last_id);
             $this->success('Qr code added successfully!');
         }
         else {
             $this->failure('Insert failed: ' . $db->getLastError());
         }
     }
-    
+
     /**
      * Edit qr code
-     * 
+     *
      */
     public function editQrcode($input_data, $data_to_db) {
         $db = getDbInstance();
         $old_qrcode = $this->getQrcode($input_data["id"]);
 
+        $data_to_db['filename'] = $this->sanitizeFilename($data_to_db['filename']);
         $data_to_db['qrcode'] = $data_to_db['filename'].'.'.$old_qrcode["format"];
 
         if(!file_exists(SAVED_QRCODE_DIRECTORY.$data_to_db['filename'].'.'.$old_qrcode["format"]) || $data_to_db['filename'] == $input_data["old_filename"]){
@@ -337,6 +371,7 @@ class Qrcode {
             $this->failure('You cannot edit a qr code with an existing name on the server!');
         
         if ($stat){
+            audit_log('qrcode_updated', $this->table, $input_data['id']);
             $this->success('Qr code updated successfully!');
         }
         else {
@@ -344,10 +379,10 @@ class Qrcode {
         }
     }
 
-    
+
     /**
      * Delete qr code
-     * 
+     *
      */
     public function deleteQrcode($id, $async = false) {
         $db = getDbInstance();
@@ -356,7 +391,11 @@ class Qrcode {
 
         $db->where('id', $id);
         $status = $db->delete($this->table);
-        
+
+        if ($status) {
+            audit_log('qrcode_deleted', $this->table, $id);
+        }
+
         try{
             unlink(SAVED_QRCODE_DIRECTORY.$qrcode["filename"].'.'.$qrcode["format"]);
         }

@@ -1,12 +1,12 @@
 <?php
-session_start();
-require_once 'config/config.php';
+require_once 'includes/bootstrap.php';
 $token = bin2hex(openssl_random_pseudo_bytes(16));
 
 // If User has already logged in, redirect to dashboard page.
 if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === TRUE)
 {
 	header('Location: index.php');
+	exit;
 }
 
 // If user has previously selected "remember me option": 
@@ -33,9 +33,17 @@ if (isset($_COOKIE['series_id']) && isset($_COOKIE['remember_token']))
                 exit;
             }
 
+			session_regenerate_id(true);
+
 			$_SESSION['user_logged_in'] = TRUE;
             $_SESSION['user_id'] = $row['id'];
 			$_SESSION['type'] = $row['type'];
+			$_SESSION['username'] = $row['username'];
+			$_SESSION['must_change_password'] = !empty($row['must_change_password']);
+			$_SESSION['last_activity'] = time();
+
+			audit_log('login_success_remember');
+
 			header('Location: index.php');
 			exit;
 		}
@@ -71,6 +79,7 @@ if (isset($_COOKIE['series_id']) && isset($_COOKIE['remember_token']))
       <p class="login-box-msg">Sign in to start your session</p>
 
       <form method="POST" action="authenticate.php">
+        <?php echo csrf_field(); ?>
         <div class="input-group mb-3">
           <input type="text" name="username" class="form-control" placeholder="Username" required="required">
           <div class="input-group-append">

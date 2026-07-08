@@ -3,11 +3,32 @@ require_once 'config/config.php';
 
 class Users
 {
+    const ALLOWED_TYPES = ['super', 'admin'];
+
     /**
      *
      */
     public function __construct()
     {
+    }
+
+    /**
+     * Server-side validatie van username/type. Geeft een foutmelding terug (string) of null als geldig.
+     */
+    private function validateUsernameAndType($username, $type) {
+        if (!is_string($username) || strlen($username) < 3 || strlen($username) > 50) {
+            return 'Username must be between 3 and 50 characters.';
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9._-]+$/', $username)) {
+            return 'Username may only contain letters, numbers, dots, underscores and hyphens.';
+        }
+
+        if (!in_array($type, self::ALLOWED_TYPES, true)) {
+            return 'Invalid user type.';
+        }
+
+        return null;
     }
 
     /**
@@ -54,6 +75,15 @@ class Users
     public function addUser($input_data) {
         $db = getDbInstance();
 
+        $validation_error = $this->validateUsernameAndType($input_data['username'] ?? '', $input_data['type'] ?? '');
+        if ($validation_error !== null) {
+            $this->failure($validation_error, 'Location: user.php');
+        }
+
+        if (!isset($input_data['password']) || strlen($input_data['password']) < 10) {
+            $this->failure('Password must be at least 10 characters long.', 'Location: user.php');
+        }
+
         $data_to_db["username"] = $input_data["username"];
         $data_to_db['password'] = password_hash($input_data['password'], PASSWORD_DEFAULT);
         $data_to_db["type"] = $input_data["type"];
@@ -66,8 +96,10 @@ class Users
 
 	    $last_id = $db->insert('users', $data_to_db);
 
-	    if ($last_id)
+	    if ($last_id) {
+		    audit_log('user_created', 'user', $last_id);
 		    $this->success('User added successfully');
+	    }
     }
     
     /**
@@ -77,28 +109,43 @@ class Users
     public function editUser($input_data) {
         $db = getDbInstance();
 
+        $query_string = http_build_query(array(
+            'id' => $input_data["id"],
+            'edit' => "true",
+        ));
+
+        $validation_error = $this->validateUsernameAndType($input_data['username'] ?? '', $input_data['type'] ?? '');
+        if ($validation_error !== null) {
+            $this->failure($validation_error, 'Location: user.php?'.$query_string);
+        }
+
+        if (isset($input_data['password']) && strlen($input_data['password']) > 0 && strlen($input_data['password']) < 10) {
+            $this->failure('Password must be at least 10 characters long.', 'Location: user.php?'.$query_string);
+        }
+
         $db->where('username', $input_data['username']);
         $db->where('id', $input_data["id"], '!=');
         $row = $db->getOne('users');
 
         if (!empty($row['username']))  {
-            $query_string = http_build_query(array(
-                'id' => $input_data["id"],
-                'edit' => "true",
-            ));
             $this->failure('Username already exists', 'Location: user.php?'.$query_string);
         }
 
         $data_to_db["username"] = $input_data["username"];
-        $data_to_db['password'] = password_hash($input_data['password'], PASSWORD_DEFAULT);
         $data_to_db["type"] = $input_data["type"];
+
+        // Alleen wachtwoord overschrijven als er een nieuwe waarde is opgegeven.
+        if (!empty($input_data['password'])) {
+            $data_to_db['password'] = password_hash($input_data['password'], PASSWORD_DEFAULT);
+        }
 
 	    $db->where('id', $input_data["id"]);
 	    $stat = $db->update('users', $data_to_db);
-        
-        if ($stat)
+
+        if ($stat) {
+            audit_log('user_updated', 'user', $input_data['id']);
             $this->success('User updated successfully!');
-        else
+        } else
             $this->failure('Failed to update User: ' . $db->getLastError());
     }
     
@@ -116,9 +163,10 @@ class Users
         $db->where('id', $id);
         $stat = $db->delete('users');
 
-        if ($stat)
+        if ($stat) {
+            audit_log('user_deleted', 'user', $id);
             $this->info('User deleted successfully!');
-        else
+        } else
             $this->failure('Unable to delete user');
     }
     

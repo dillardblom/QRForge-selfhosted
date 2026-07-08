@@ -1,13 +1,28 @@
 services:
+  nginx:
+    image: "nginx:1.27-alpine"
+    restart: "unless-stopped"
+    ports:
+      - "80:80"
+      # 443 pas openzetten zodra SSL-certificaten zijn gemount (bv. via certbot-volume
+      # of een losse reverse proxy zoals Caddy/Traefik ervoor). Zie infra-fase van het plan.
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - php_dynamic_qrcode_saved_qrcode_data:/var/www/html/saved_qrcode:ro
+    depends_on:
+      - php-dynamic-qrcode
+    networks:
+      - php-dynamic-qrcode-network
+
   php-dynamic-qrcode:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.fpm
     restart: "unless-stopped"
     environment:
-      TYPE: "${TYPE:-docker}"
+      TYPE: "docker"
       QRCODE_GENERATOR: "${QRCODE_GENERATOR:-internal-chillerlan.qrcode}"
-      BASE_URL: "${BASE_URL:-http://localhost}"
+      BASE_URL: "${BASE_URL:?zet BASE_URL in .env, bv. https://qr.ensembia.com}"
       DATABASE_HOST: "php-dynamic-qrcode-db"
       DATABASE_PORT: "3306"
       DATABASE_NAME: "${DATABASE_NAME:-qrcode}"
@@ -15,8 +30,6 @@ services:
       DATABASE_PASSWORD: "${DATABASE_PASSWORD:?zet DATABASE_PASSWORD in .env}"
       DATABASE_PREFIX: "${DATABASE_PREFIX:-}"
       DATABASE_CHARSET: "${DATABASE_CHARSET:-utf8}"
-    ports:
-      - "80:80"
     depends_on:
       php-dynamic-qrcode-db:
         condition: service_healthy

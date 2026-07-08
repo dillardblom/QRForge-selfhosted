@@ -3,6 +3,7 @@
         <div id="err-msg"></div>
         <div class="bulk-action-wrapper">
             <form id="bulk-action" action="bulk_action.php" method="POST">
+<?php echo csrf_field(); ?>
                 <div class="col-sm-12 mb-2" style="margin-left: 10px">
                     <div class="row">
                         <div class="col-5 col-md-2">
@@ -96,6 +97,7 @@
 <div class="modal fade" id="delete-modal" role="dialog">
     <div class="modal-dialog">
         <form action="static_qrcode.php" method="POST">
+<?php echo csrf_field(); ?>
             <!-- Modal content -->
 
             <div class="modal-content">

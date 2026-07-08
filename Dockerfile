@@ -86,7 +86,10 @@ RUN docker-php-ext-install sockets && docker-php-ext-enable sockets
 
 RUN mkdir -p /opt && chmod 777 /opt
 WORKDIR /opt
-RUN git clone https://github.com/chillerlan/php-qrcode.git \
+# Vastgezet op 5.0.5 (laatste 5.x-release): vanaf 6.0.0 vereist de library PHP >= 8.4,
+# terwijl deze image op PHP 8.3 draait. Een ongepinde clone van master is bovendien
+# een reproduceerbaarheids-/supply-chain-risico (build kan zonder waarschuwing breken).
+RUN git clone --branch 5.0.5 --depth 1 https://github.com/chillerlan/php-qrcode.git \
         && chmod -R 777 ./php-qrcode
 RUN cp ./php-qrcode/composer.json /var/www/html/composer.json
 RUN mkdir -p /var/www/html/test && chmod 777 /var/www/html/test

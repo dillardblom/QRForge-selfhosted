@@ -1,4 +1,5 @@
 <form class="form" action="static_qrcode.php?type=event" method="post" id="static_form" enctype="multipart/form-data">
+<?php echo csrf_field(); ?>
     <?php include BASE_PATH.'/forms/qrcode_options.php'; ?>
 <!-- Input forms -->
 <div class="col-sm-4">

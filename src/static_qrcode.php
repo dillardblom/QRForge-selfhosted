@@ -1,10 +1,13 @@
 <?php
-session_start();
-require_once 'config/config.php';
+require_once 'includes/bootstrap.php';
 require_once BASE_PATH.'/includes/auth_validate.php';
 require_once BASE_PATH . '/lib/StaticQrcode/StaticQrcode.php';
 
 $static_qrcode_instance = new StaticQrcode();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify_or_die();
+}
 
 $edit = false;
 if($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["edit"]) && $_GET["edit"] == "true" && isset($_GET["id"])) {
@@ -115,6 +118,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["edit"])) {
                 </div>
                 <?php if($edit) {?>
                     <form class="form" action="" method="post" id="static_form" enctype="multipart/form-data">
+<?php echo csrf_field(); ?>
                         <div class="card-body">
                             <?php include BASE_PATH . '/forms/form_static_edit.php';?>
                         </div>

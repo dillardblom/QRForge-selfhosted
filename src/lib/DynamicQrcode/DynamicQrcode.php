@@ -56,6 +56,8 @@ class DynamicQrcode {
      * We save into db the url of qrcode image
      */
     public function addQrcode($input_data) {
+        $this->validateLink($input_data['link'] ?? '');
+
         if($input_data['id_owner'] != "")
             $data_to_db['id_owner'] = $input_data['id_owner'];
         else
@@ -79,6 +81,8 @@ class DynamicQrcode {
      * 
      */
     public function editQrcode($input_data) {
+        $this->validateLink($input_data['link'] ?? '');
+
         if($input_data['id_owner'] != "")
             $data_to_db['id_owner'] = $input_data['id_owner'];
         else
@@ -116,6 +120,17 @@ class DynamicQrcode {
         }
     }
 
+
+    /**
+     * Server-side validatie van de redirect-link (verplicht, max. 500 tekens per kolomdefinitie).
+     */
+    private function validateLink($link) {
+        $link = trim((string) $link);
+
+        if ($link === '' || strlen($link) > 500) {
+            $this->failure('Link is required and must be at most 500 characters.');
+        }
+    }
 
     /**
      * Flash message Failure process

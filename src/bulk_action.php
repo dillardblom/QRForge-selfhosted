@@ -1,8 +1,13 @@
 <?php
-session_start();
-require_once 'config/config.php';
+require_once 'includes/bootstrap.php';
+require_once BASE_PATH . '/includes/auth_validate.php';
 require_once BASE_PATH . '/lib/DynamicQrcode/DynamicQrcode.php';
 require_once BASE_PATH . '/lib/StaticQrcode/StaticQrcode.php';
+
+header('Content-Type: application/json');
+csrf_verify_header_or_die();
+
+$allowed_types = ['dynamic', 'static'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = getDbInstance();
@@ -12,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $params = $json['params'];
         $files = [];
 
-        if (isset($json['type'])) {
-            $type = filter_var($json['type'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        if (isset($json['type']) && in_array($json['type'], $allowed_types, true)) {
+            $type = $json['type'];
         } else {
             echo json_encode([
                 'data' => 'Type action field in the request.',
@@ -31,9 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         foreach ($params as $param) {
-            $row = $db->where('id', $param);
+            $db->where('id', $param);
+            if ($_SESSION['type'] !== 'super') {
+                $db->where('id_owner', $_SESSION['user_id']);
+                $db->orWhere('id_owner', NULL, 'IS');
+            }
             $row = $db->getOne("{$type}_qrcodes");
-            @$files[] = SAVED_QRCODE_FOLDER . $row['qrcode'];
+            if ($row !== NULL) {
+                $files[] = SAVED_QRCODE_FOLDER . $row['qrcode'];
+            }
         }
 
         $zip = new ZipArchive();
@@ -50,6 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $zip->close();
 
+        audit_log('bulk_download', $type, implode(',', $params));
+
         echo json_encode([
             'data' => $url_path,
             'status' => 200
@@ -57,10 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     } else if($json["action"] == "delete") {
         $params = $json['params'];
-        $files = [];
 
-        if (isset($json['type'])) {
-            $type = filter_var($json['type'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        if (isset($json['type']) && in_array($json['type'], $allowed_types, true)) {
+            $type = $json['type'];
         } else {
             echo json_encode([
                 'data' => 'Type action field in the request.',
@@ -79,15 +91,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if($type == "dynamic")
             $instance = new DynamicQrcode();
-        else if($type == "static")
-            $instance = new StaticQrcode();
         else
-            die("Type not allowed");
+            $instance = new StaticQrcode();
 
         foreach ($params as $param) {
-            $a = 0;
             $instance->deleteQrcode($param, true);
         }
+
+        audit_log('bulk_delete', $type, implode(',', $params));
 
         echo json_encode([
             'action' => "delete",
@@ -96,9 +107,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         exit();
 
-    } else
-        exit("Action not allowed");
+    } else {
+        echo json_encode(['data' => 'Action not allowed', 'status' => 400]);
+        exit();
+    }
 } else {
-    exit('Direct access to this script not allowed.');
+    http_response_code(405);
+    echo json_encode(['data' => 'Direct access to this script not allowed.', 'status' => 405]);
+    exit();
 }
-?>

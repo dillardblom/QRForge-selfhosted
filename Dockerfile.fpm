@@ -1,0 +1,59 @@
+FROM php:8.3-fpm
+
+RUN if [ "$(grep '^VERSION_ID=' /etc/os-release | cut -d '=' -f 2 | tr -d '"')" -eq "9" ]; then \
+        sed -i -e 's/deb.debian.org/archive.debian.org/g' \
+               -e 's/security.debian.org/archive.debian.org/g' \
+               -e '/stretch-updates/d' /etc/apt/sources.list; \
+    fi
+
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/install-php-extensions
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -q \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -qq -y \
+      curl \
+      libzip-dev \
+      libjpeg62-turbo-dev \
+      libpng-dev \
+      libfreetype6-dev \
+      zip unzip \
+    && install-php-extensions \
+      gd \
+      gettext \
+      intl \
+      mysqli \
+      opcache \
+      pdo_mysql \
+      sockets \
+      zip
+
+# Install Composer.
+ENV PATH=$PATH:/root/composer/vendor/bin \
+  COMPOSER_ALLOW_SUPERUSER=1 \
+  COMPOSER_HOME=/root/composer
+RUN cd /opt \
+  && curl -sSL https://getcomposer.org/installer > composer-setup.php \
+  && curl -sSL https://composer.github.io/installer.sha384sum > composer-setup.sha384sum \
+  && sha384sum --check composer-setup.sha384sum \
+  && php composer-setup.php --install-dir=/usr/local/bin --filename=composer --2 \
+  && rm /opt/composer-setup.php /opt/composer-setup.sha384sum
+
+RUN mkdir -p /opt && chmod 777 /opt
+WORKDIR /opt
+# Zie Dockerfile: vastgezet op 5.0.5, want 6.0.0+ vereist PHP >= 8.4.
+RUN git clone --branch 5.0.5 --depth 1 https://github.com/chillerlan/php-qrcode.git \
+        && chmod -R 777 ./php-qrcode
+RUN cp ./php-qrcode/composer.json /var/www/html/composer.json
+RUN cp -R ./php-qrcode/src /var/www/html/
+
+WORKDIR /var/www/html
+RUN composer update
+COPY ./src ./
+RUN chown -R www-data:www-data /var/www/html \
+    && find /var/www/html -type f -exec chmod 644 {} \; \
+    && find /var/www/html -type d -exec chmod 755 {} \; \
+    && chmod -R 775 /var/www/html/saved_qrcode
+
+EXPOSE 9000
+CMD ["php-fpm"]

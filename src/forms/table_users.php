@@ -47,6 +47,7 @@
 <div class="modal fade" id="delete-modal" role="dialog">
     <div class="modal-dialog">
         <form action="user.php" method="POST">
+<?php echo csrf_field(); ?>
             <!-- Modal content -->
 
             <div class="modal-content">

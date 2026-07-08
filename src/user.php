@@ -1,6 +1,5 @@
 <?php
-session_start();
-require_once 'config/config.php';
+require_once 'includes/bootstrap.php';
 require_once BASE_PATH . '/includes/auth_validate.php';
 require_once BASE_PATH . '/lib/Users/Users.php';
 
@@ -9,6 +8,9 @@ $user_instance = new Users();
 if ($_SESSION['type'] !== 'super')
     $user_instance->failure('Only a "super admin" account can access the admin listing page', 'Location: index.php');
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify_or_die();
+}
 
 $edit = false;
 if($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["edit"]) && $_GET["edit"] == "true" && isset($_GET["id"])) {
@@ -83,6 +85,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["edit"])) {
                     <h3 class="card-title">Enter the requested data</h3>
                 </div>
 	            <form class="well form-horizontal" action="" method="post" id="contact_form" enctype="multipart/form-data">
+<?php echo csrf_field(); ?>
 	                <div class="card-body">
 		                <?php include BASE_PATH . '/forms/form_users.php'; ?>
 		            </div>
