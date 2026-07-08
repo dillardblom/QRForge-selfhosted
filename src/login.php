@@ -40,6 +40,8 @@ if (isset($_COOKIE['series_id']) && isset($_COOKIE['remember_token']))
 			$_SESSION['type'] = $row['type'];
 			$_SESSION['username'] = $row['username'];
 			$_SESSION['must_change_password'] = !empty($row['must_change_password']);
+			$_SESSION['can_view_static'] = !empty($row['can_view_static']);
+			$_SESSION['can_view_dynamic'] = !empty($row['can_view_dynamic']);
 			$_SESSION['last_activity'] = time();
 
 			audit_log('login_success_remember');

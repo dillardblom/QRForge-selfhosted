@@ -1,4 +1,6 @@
+<?php $is_readonly_user = $_SESSION['type'] === 'user'; ?>
 <div class="row">
+    <?php if (!$is_readonly_user): ?>
     <div class="col-12" id="bulk-action-div" style="display: none;">
         <div id="err-msg"></div>
         <div class="bulk-action-wrapper">
@@ -21,13 +23,16 @@
             </form>
         </div>
     </div>
+    <?php endif; ?>
     <div class="col-12">
         <div class="card">
             <div class="card-body table-responsive p-0">
       <table class="table table-striped table-bordered">
         <thead>
             <tr>
+                <?php if (!$is_readonly_user): ?>
                 <th><input type="checkbox" name="bulk-select" value="1"></th>
+                <?php endif; ?>
                 <th>ID</th>
                 <th>Owner</th>
                 <th>Filename</th>
@@ -40,7 +45,9 @@
         <tbody>
             <?php foreach ($rows as $row): ?>
             <tr>
+                <?php if (!$is_readonly_user): ?>
                 <td><input type="checkbox" name="action[]" value="<?=$row['id']?>" onchange="updateBulkActionVisibility()"></td>
+                <?php endif; ?>
                 <td><?php echo $row['id']; ?></td>
                 <td>
                     <?php
@@ -64,10 +71,10 @@
                     <?php echo '<img src="'.SAVED_QRCODE_FOLDER.htmlspecialchars($row['qrcode']).'" width="100" height="100">'; ?>
                 </td>
                 <td>
-                    
+                    <?php if (!$is_readonly_user): ?>
                     <!-- EDIT -->
                     <a href="static_qrcode.php?edit=true&id=<?php echo $row['id']; ?>" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                    
+
                     <!-- DELETE -->
                     <a
                             class="btn btn-danger delete_btn"
@@ -75,7 +82,7 @@
                             data-target="#delete-modal"
                             data-del_id="<?php echo $row["id"];?>"
                     ><i class="fas fa-trash"></i></a>
-
+                    <?php endif; ?>
                     <!-- DOWNLOAD -->
                     <a href="<?php echo SAVED_QRCODE_FOLDER.htmlspecialchars($row['qrcode']); ?>" class="btn btn-primary" download><i class="fa fa-download"></i></a>
                 </td>
@@ -93,6 +100,7 @@
     </div><!-- /.col -->
 </div><!-- /.row -->
 
+<?php if (!$is_readonly_user): ?>
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="delete-modal" role="dialog">
     <div class="modal-dialog">
@@ -118,6 +126,7 @@
     </div>
 </div>
 <!-- /.Delete Confirmation Modal -->
+<?php endif; ?>
 
 <script>
     const deleteButtons = document.querySelectorAll('.delete_btn');

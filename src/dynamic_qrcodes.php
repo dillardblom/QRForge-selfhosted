@@ -3,6 +3,12 @@ require_once 'includes/bootstrap.php';
 require_once BASE_PATH . '/includes/auth_validate.php';
 require_once BASE_PATH . '/lib/DynamicQrcode/DynamicQrcode.php';
 
+if ($_SESSION['type'] === 'user' && empty($_SESSION['can_view_dynamic'] ?? null)) {
+    $_SESSION['failure'] = 'You are not allowed to view dynamic qr codes.';
+    header('Location: index.php');
+    exit;
+}
+
 $db = getDbInstance();
 $dynamic_qrcode = new DynamicQrcode();
 
@@ -12,7 +18,8 @@ require_once BASE_PATH . '/includes/search_order.php';
 $page = filter_input(INPUT_GET, 'page', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? 1;
 $db->pageLimit = 15;
 
-if($_SESSION['type'] !==  'super') {
+// 'user' ziet, net als 'super', alle codes (heeft zelf geen eigen codes om op te scopen).
+if($_SESSION['type'] === 'admin') {
     $db->where("id_owner", $_SESSION['user_id']);
     $db->orWhere ("id_owner", NULL, 'IS');
 }
@@ -49,6 +56,7 @@ $total_pages = $db->totalPages;
             <h1 class="m-0 text-dark">Dynamic Qr codes</h1>
           </div><!-- /.col -->
           
+          <?php if ($_SESSION['type'] !== 'user'): ?>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
                 <li class="breadcrumb-item">
@@ -56,6 +64,7 @@ $total_pages = $db->totalPages;
                 </li>
             </ol>
           </div><!-- /.col -->
+          <?php endif; ?>
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
     </div><!-- /.content-header -->

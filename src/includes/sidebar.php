@@ -33,6 +33,7 @@
              </p>
            </a>
          </li>
+          <?php if ($_SESSION['type'] !== 'user' || !empty($_SESSION['can_view_dynamic'])): ?>
           <li <?php echo ((substr(CURRENT_PAGE, 0, 19) == 'dynamic_qrcodes.php') || (substr(CURRENT_PAGE, 0, 18) == 'dynamic_qrcode.php')) ? ' class="nav-item has-treeview menu-open"' : ' class="nav-item has-treeview"'; ?>>
             <a href="#" <?php echo ((substr(CURRENT_PAGE, 0, 19) == 'dynamic_qrcodes.php') || (substr(CURRENT_PAGE, 0, 18) == 'dynamic_qrcode.php')) ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
               <i class="nav-icon fa fa-qrcode"></i>
@@ -48,14 +49,18 @@
                   <p>List all</p>
                 </a>
               </li>
+              <?php if ($_SESSION['type'] !== 'user'): ?>
               <li class="nav-item">
                 <a href="./dynamic_qrcode.php" <?php echo (CURRENT_PAGE == 'dynamic_qrcode.php') ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
                   <i class="far fa-circle nav-icon"></i>
                   <p>Add new</p>
                 </a>
               </li>
+              <?php endif; ?>
             </ul>
           </li>
+          <?php endif; ?>
+            <?php if ($_SESSION['type'] !== 'user' || !empty($_SESSION['can_view_static'])): ?>
             <li <?php echo ((substr(CURRENT_PAGE, 0, 18) == 'static_qrcodes.php') || (substr(CURRENT_PAGE, 0, 17) == 'static_qrcode.php')) ? ' class="nav-item has-treeview menu-open"' : ' class="nav-item has-treeview"'; ?>>
                 <a href="#" <?php echo ((substr(CURRENT_PAGE, 0, 18) == 'static_qrcodes.php') || (substr(CURRENT_PAGE, 0, 17) == 'static_qrcode.php')) ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
                     <i class="nav-icon fa fa-qrcode"></i>
@@ -71,20 +76,25 @@
                             <p>List all</p>
                         </a>
                     </li>
+                    <?php if ($_SESSION['type'] !== 'user'): ?>
                     <li class="nav-item">
                         <a href="./static_qrcode.php" <?php echo (CURRENT_PAGE == 'static_qrcode.php') ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
                             <i class="far fa-circle nav-icon"></i>
                             <p>Add new</p>
                         </a>
                     </li>
+                    <?php endif; ?>
                 </ul>
             </li>
+            <?php endif; ?>
+          <?php if ($_SESSION['type'] === 'super'): ?>
           <li class="nav-item">
             <a href="./users.php" <?php echo ((substr(CURRENT_PAGE, 0, 15) == 'users.php') || (substr(CURRENT_PAGE, 0, 14) == 'user.php')) ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
                 <i class="fas fa-users nav-icon"></i>
               <p>Users</p>
             </a>
           </li>
+          <?php endif; ?>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

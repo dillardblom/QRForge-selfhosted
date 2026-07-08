@@ -38,8 +38,47 @@
                 <label class="radio">
                 <input type="radio" name="type" value="admin" required="required" <?php echo ($edit && $user['type'] =='admin') ? "checked": "" ; ?>/> Admin</label>
             </div>
+
+            <div class="radio">
+                <label class="radio">
+                <input type="radio" name="type" value="user" required="required" id="type-user" <?php echo ($edit && $user['type'] =='user') ? "checked": "" ; ?>/> User (read-only)</label>
+            </div>
         </div>
     </div>
+
+    <div class="col-sm-12 mt-2" id="user-view-toggles">
+        <label>Zichtbaarheid voor 'User'-rol</label>
+        <div class="form-group">
+            <div class="icheck-primary d-inline-block mr-4">
+                <input type="checkbox" name="can_view_static" id="can_view_static" value="1" <?php echo ($edit && !empty($user['can_view_static'])) ? "checked": "" ; ?>>
+                <label for="can_view_static">Mag statische QR-codes bekijken</label>
+            </div>
+            <div class="icheck-primary d-inline-block">
+                <input type="checkbox" name="can_view_dynamic" id="can_view_dynamic" value="1" <?php echo ($edit && !empty($user['can_view_dynamic'])) ? "checked": "" ; ?>>
+                <label for="can_view_dynamic">Mag dynamische QR-codes bekijken</label>
+            </div>
+            <small class="form-text text-muted">Alleen van toepassing op het type 'User'. Reports/statistieken zijn voor 'User' altijd zichtbaar.</small>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var typeRadios = document.querySelectorAll('input[name="type"]');
+            var toggles = document.getElementById('user-view-toggles');
+
+            function updateToggleVisibility() {
+                var userSelected = document.getElementById('type-user').checked;
+                toggles.style.display = userSelected ? '' : 'none';
+            }
+
+            typeRadios.forEach(function (radio) {
+                radio.addEventListener('change', updateToggleVisibility);
+            });
+
+            updateToggleVisibility();
+        })();
+    </script>
+
     <?php if($edit) { ?>
         <input type="hidden" name="id" value="<?php echo $user['id'];?>"/>
         <input type="hidden" name="edit" value="true"/>

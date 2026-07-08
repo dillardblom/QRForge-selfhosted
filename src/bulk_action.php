@@ -35,9 +35,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
+        if ($_SESSION['type'] === 'user') {
+            $view_flag = $type === 'dynamic' ? 'can_view_dynamic' : 'can_view_static';
+            if (empty($_SESSION[$view_flag] ?? null)) {
+                http_response_code(403);
+                echo json_encode(['data' => 'Not allowed to view this qr code type.', 'status' => 403]);
+                exit();
+            }
+        }
+
         foreach ($params as $param) {
             $db->where('id', $param);
-            if ($_SESSION['type'] !== 'super') {
+            if ($_SESSION['type'] === 'admin') {
                 $db->where('id_owner', $_SESSION['user_id']);
                 $db->orWhere('id_owner', NULL, 'IS');
             }
@@ -69,6 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         exit();
     } else if($json["action"] == "delete") {
+        if ($_SESSION['type'] === 'user') {
+            http_response_code(403);
+            echo json_encode(['data' => 'The "user" role is read-only.', 'status' => 403]);
+            exit();
+        }
+
         $params = $json['params'];
 
         if (isset($json['type']) && in_array($json['type'], $allowed_types, true)) {

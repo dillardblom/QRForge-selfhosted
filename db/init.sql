@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `type` varchar(10) NOT NULL,
   `must_change_password` tinyint(1) NOT NULL DEFAULT 0,
   `password_changed_at` datetime DEFAULT NULL,
+  `can_view_static` tinyint(1) NOT NULL DEFAULT 0,
+  `can_view_dynamic` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;

@@ -3,7 +3,7 @@ require_once 'config/config.php';
 
 class Users
 {
-    const ALLOWED_TYPES = ['super', 'admin'];
+    const ALLOWED_TYPES = ['super', 'admin', 'user'];
 
     /**
      *
@@ -87,6 +87,8 @@ class Users
         $data_to_db["username"] = $input_data["username"];
         $data_to_db['password'] = password_hash($input_data['password'], PASSWORD_DEFAULT);
         $data_to_db["type"] = $input_data["type"];
+        $data_to_db['can_view_static'] = !empty($input_data['can_view_static']) ? 1 : 0;
+        $data_to_db['can_view_dynamic'] = !empty($input_data['can_view_dynamic']) ? 1 : 0;
 
         $db->where('username', $data_to_db['username']);
         $db->get('users');
@@ -133,6 +135,8 @@ class Users
 
         $data_to_db["username"] = $input_data["username"];
         $data_to_db["type"] = $input_data["type"];
+        $data_to_db['can_view_static'] = !empty($input_data['can_view_static']) ? 1 : 0;
+        $data_to_db['can_view_dynamic'] = !empty($input_data['can_view_dynamic']) ? 1 : 0;
 
         // Alleen wachtwoord overschrijven als er een nieuwe waarde is opgegeven.
         if (!empty($input_data['password'])) {

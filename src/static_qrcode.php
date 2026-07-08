@@ -3,6 +3,12 @@ require_once 'includes/bootstrap.php';
 require_once BASE_PATH.'/includes/auth_validate.php';
 require_once BASE_PATH . '/lib/StaticQrcode/StaticQrcode.php';
 
+if ($_SESSION['type'] === 'user') {
+    $_SESSION['failure'] = 'The "user" role is read-only and cannot create, edit or delete qr codes.';
+    header('Location: index.php');
+    exit;
+}
+
 $static_qrcode_instance = new StaticQrcode();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
