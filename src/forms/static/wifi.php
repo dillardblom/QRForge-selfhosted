@@ -10,6 +10,7 @@
             <label>Encryption *</label>
             <select name="encryption" class="form-control">
                 <option value="WPA" Selected>WPA/WPA2</option>
+                <option value="WPA3">WPA3</option>
                 <option value="WEP">WEP</option>
                 <option value="">None</option>
             </select>

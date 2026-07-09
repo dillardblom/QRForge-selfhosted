@@ -14,7 +14,7 @@
     
     <div class="col-6 col-md-3">
             <div class="form-group">
-                <label>Amount *</label>
+                <label>Amount</label>
                 <div class="input-group">
                     <input type="number" name="amount" value="" placeholder="" class="form-control" step="0.0001">
                     <div class="input-group-append">

@@ -330,21 +330,48 @@ class StaticQrcode {
     /**
      * create a qr code of type "bitcoin"
      * @string address -> required
-     * @int amount -> required
+     * @string amount -> optional (a bitcoin address is useful as a standing QR code,
+     *                    not just for one specific payment amount)
      * @string label
      * @string message
      */
     public function bitcoinQrcode($address, $amount, $label, $message)
     {
-        if($address != NULL && $amount != NULL){
-            $this->sData = 'bitcoin:'.$address.'?amount='.$amount.'&label='.$label.'&message='.$message;
-            $this->sContent = '<strong>BTC address:</strong> '.$address.'<br>'.'<strong>Amount:</strong> '.$amount.'<br>';
-            $this->sContent .= '<strong>Label:</strong> '.$label.'<br>'.'<strong>Message:</strong> '.$message;
-        
-            $this->addQrcode("bitcoin");
-        }
-        else
+        $address = trim((string) $address);
+        $amount = trim((string) $amount);
+        $label = trim((string) $label);
+        $message = trim((string) $message);
+
+        if ($address === '') {
             $this->requiredFieldsError();
+            return;
+        }
+
+        $params = [];
+        if ($amount !== '') {
+            $params[] = 'amount=' . rawurlencode($amount);
+        }
+        if ($label !== '') {
+            $params[] = 'label=' . rawurlencode($label);
+        }
+        if ($message !== '') {
+            $params[] = 'message=' . rawurlencode($message);
+        }
+
+        $this->sData = 'bitcoin:' . $address . ($params ? '?' . implode('&', $params) : '');
+
+        $this->sContent = '<strong>BTC address:</strong> ' . $address . '<br>';
+        if ($amount !== '') {
+            $this->sContent .= '<strong>Amount:</strong> ' . $amount . '<br>';
+        }
+        if ($label !== '') {
+            $this->sContent .= '<strong>Label:</strong> ' . $label . '<br>';
+        }
+        if ($message !== '') {
+            $this->sContent .= '<strong>Message:</strong> ' . $message;
+        }
+
+        $this->addQrcode("bitcoin");
     }
     
     /**
@@ -473,6 +500,9 @@ class StaticQrcode {
         $input_data["foreground"] = $_POST['foreground'];
         $input_data["background"] = $_POST['background'];
         $input_data["frame_text"] = $_POST['frame_text'] ?? '';
+        $input_data["frame_font"] = $_POST['frame_font'] ?? 'sans';
+        $input_data["frame_font_size"] = $_POST['frame_font_size'] ?? 16;
+        $input_data["icon_tmp_path"] = $_POST['icon_tmp_path'] ?? null;
 
         $data_to_qrcode = urlencode($this->sData);
 

@@ -58,6 +58,7 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
     <div class="col-sm-12 mb-2">
         <div class="row">
             <div class="col-6 col-md-3">
+                <label>&nbsp;</label>
                 <button type="button" id="random_style_btn" class="btn btn-outline-secondary btn-block">
                     <i class="fa fa-dice"></i> Random style
                 </button>
@@ -84,10 +85,25 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
                     </div>
                 </div>
             </div>
+
+            <div class="col-6 col-md-3">
+                <label>Style preview</label>
+                <div id="style_preview" class="d-flex align-items-center">
+                    <span id="style_preview_swatch" style="display:inline-block;width:38px;height:38px;border:3px solid #000;background:#fff;border-radius:4px;"></span>
+                    <small id="style_preview_text" class="ml-2 text-muted"></small>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="dist/js/qrcode-style-tools.js?nocache=<?php print rand();?>"></script>
+    <!--
+        Note: no <script src="dist/js/qrcode-style-tools.js"> tag here on purpose. This
+        partial is included once per qr type on the static "add" page (form_static_add.php),
+        which stacks all types into the DOM as tab-panes; including the script here would load
+        and execute it once per type, each execution re-attaching its own listeners to every
+        button on the page. The script is included exactly once by the pages that use this
+        partial (form_static_add.php and form_dynamic_add.php).
+    -->
 
     <!-- Its use is not recommended. Read the documentation
     <div class="form-group">
@@ -130,6 +146,35 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
             <small class="form-text text-muted">Optional label rendered below the code. Only applies to PNG/JPEG/GIF, not SVG/EPS.</small>
         </div>
     </div>
+
+    <div class="col-6 col-md-2">
+        <div class="form-group">
+            <label for="frame_font">Frame font</label>
+            <select name="frame_font" id="frame_font" class="form-control">
+                <option value="sans" selected>Sans</option>
+                <option value="sans-bold">Sans Bold</option>
+                <option value="serif">Serif</option>
+                <option value="serif-bold">Serif Bold</option>
+                <option value="mono">Monospace</option>
+                <option value="mono-bold">Monospace Bold</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+        <div class="form-group">
+            <label for="frame_font_size">Frame font size</label>
+            <input type="number" name="frame_font_size" id="frame_font_size" value="16" min="8" max="60" class="form-control">
+        </div>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="icon">Icon above QR code</label>
+            <input type="file" name="icon" id="icon" accept="image/png,image/jpeg,image/gif" class="form-control-file">
+            <small class="form-text text-muted">Optional. PNG/JPEG/GIF, max 1MB. Shown above the code (not embedded in it). Only applies to PNG/JPEG/GIF output.</small>
+        </div>
+    </div>
   </div>
 </div>
 
@@ -140,7 +185,7 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
                 <div class="form-group">
                     <label for="id_owner">Owner *</label>
                     <select name="id_owner" class="form-control">
-                        <option value="" selected>All</option>
+                        <option value="">All (shared with every admin)</option>
                         <?php
 
                         require_once BASE_PATH . '/lib/Users/Users.php';
@@ -148,8 +193,9 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
                         $users = $users_instance->getAllUsers();
 
                         foreach ($users as $user) {
+                            $is_self = (int) $user["id"] === (int) $_SESSION["user_id"];
                             ?>
-                            <option value="<?php echo $user["id"];?>"><?php echo $user["username"];?></option>
+                            <option value="<?php echo $user["id"];?>" <?php echo $is_self ? 'selected' : ''; ?>><?php echo $user["username"];?></option>
                         <?php } ?>
                     </select>
                 </div>

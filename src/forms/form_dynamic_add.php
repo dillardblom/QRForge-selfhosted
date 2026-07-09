@@ -54,6 +54,7 @@
     <div class="col-sm-12 mb-2">
         <div class="row">
             <div class="col-6 col-md-3">
+                <label>&nbsp;</label>
                 <button type="button" id="random_style_btn" class="btn btn-outline-secondary btn-block">
                     <i class="fa fa-dice"></i> Random style
                 </button>
@@ -78,6 +79,14 @@
                     <div class="input-group-append">
                         <button type="button" id="preset_save_btn" class="btn btn-outline-secondary"><i class="fa fa-save"></i></button>
                     </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label>Style preview</label>
+                <div id="style_preview" class="d-flex align-items-center">
+                    <span id="style_preview_swatch" style="display:inline-block;width:38px;height:38px;border:3px solid #000;background:#fff;border-radius:4px;"></span>
+                    <small id="style_preview_text" class="ml-2 text-muted"></small>
                 </div>
             </div>
         </div>
@@ -136,6 +145,35 @@
             <small class="form-text text-muted">Optional label rendered below the code. Only applies to PNG/JPEG/GIF, not SVG/EPS.</small>
         </div>
     </div>
+
+    <div class="col-6 col-md-2">
+        <div class="form-group">
+            <label for="frame_font">Frame font</label>
+            <select name="frame_font" id="frame_font" class="form-control">
+                <option value="sans" selected>Sans</option>
+                <option value="sans-bold">Sans Bold</option>
+                <option value="serif">Serif</option>
+                <option value="serif-bold">Serif Bold</option>
+                <option value="mono">Monospace</option>
+                <option value="mono-bold">Monospace Bold</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+        <div class="form-group">
+            <label for="frame_font_size">Frame font size</label>
+            <input type="number" name="frame_font_size" id="frame_font_size" value="16" min="8" max="60" class="form-control">
+        </div>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="icon">Icon above QR code</label>
+            <input type="file" name="icon" id="icon" accept="image/png,image/jpeg,image/gif" class="form-control-file">
+            <small class="form-text text-muted">Optional. PNG/JPEG/GIF, max 1MB. Shown above the code (not embedded in it). Only applies to PNG/JPEG/GIF output.</small>
+        </div>
+    </div>
   </div>
 </div>
 
@@ -146,7 +184,7 @@
                 <div class="form-group">
                     <label for="id_owner">Owner *</label>
                     <select name="id_owner" class="form-control">
-                        <option value="" selected>All</option>
+                        <option value="">All (shared with every admin)</option>
                         <?php
 
                         require_once BASE_PATH . '/lib/Users/Users.php';
@@ -154,8 +192,9 @@
                         $users = $users_instance->getAllUsers();
 
                         foreach ($users as $user) {
+                            $is_self = (int) $user["id"] === (int) $_SESSION["user_id"];
                         ?>
-                        <option value="<?php echo $user["id"];?>"><?php echo $user["username"];?></option>
+                        <option value="<?php echo $user["id"];?>" <?php echo $is_self ? 'selected' : ''; ?>><?php echo $user["username"];?></option>
                         <?php } ?>
                     </select>
                 </div>

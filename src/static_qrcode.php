@@ -34,7 +34,15 @@ if($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["edit"])) {
         $static_qrcode_instance->editQrcode($_POST);
 }
 
-if($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["edit"])) {
+if($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["edit"]) && !isset($_POST["del_id"])) {
+    $icon_upload = qr_handle_icon_upload('icon');
+    if (!$icon_upload['ok']) {
+        $_SESSION['failure'] = $icon_upload['error'];
+        header('Location: ' . basename(__FILE__) . '?type=' . urlencode($_GET['type'] ?? ''));
+        exit;
+    }
+    $_POST['icon_tmp_path'] = $icon_upload['path'];
+
     switch($_GET['type']){
         case 'text':         $static_qrcode_instance->textQrcode($_POST['text']);
             break;

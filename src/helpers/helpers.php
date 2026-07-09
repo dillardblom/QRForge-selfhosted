@@ -117,6 +117,45 @@ function paginationLinks($current_page, $total_pages, $base_url) {
 	return $html;
 }
 
+/**
+ * Handles the optional "icon above the qr code" upload. Validates the actual image
+ * type (not just the extension/mime the browser claims) and stores the file outside
+ * the document root, next to the generated qr codes.
+ */
+function qr_handle_icon_upload($fileKey = 'icon') {
+    if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => true, 'path' => null];
+    }
+
+    if ($_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'error' => 'Icon upload failed.'];
+    }
+
+    if ($_FILES[$fileKey]['size'] > 1024 * 1024) {
+        return ['ok' => false, 'error' => 'Icon must be smaller than 1MB.'];
+    }
+
+    $info = @getimagesize($_FILES[$fileKey]['tmp_name']);
+    $allowed = [IMAGETYPE_PNG => 'png', IMAGETYPE_JPEG => 'jpg', IMAGETYPE_GIF => 'gif'];
+
+    if ($info === false || !isset($allowed[$info[2]])) {
+        return ['ok' => false, 'error' => 'Icon must be a PNG, JPEG or GIF image.'];
+    }
+
+    $dir = SAVED_QRCODE_DIRECTORY . 'icons/';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0750, true);
+    }
+
+    $destination = $dir . bin2hex(random_bytes(16)) . '.' . $allowed[$info[2]];
+
+    if (!move_uploaded_file($_FILES[$fileKey]['tmp_name'], $destination)) {
+        return ['ok' => false, 'error' => 'Could not store the uploaded icon.'];
+    }
+
+    return ['ok' => true, 'path' => $destination];
+}
+
 function base_url() {
     require_once(__DIR__ . '/../config/environment.php');
     if (defined('BASE_URL') && BASE_URL !== null) {

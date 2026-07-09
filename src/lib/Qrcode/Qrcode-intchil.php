@@ -72,11 +72,29 @@ class Qrcode {
         return $format;
     }
 
+    const FRAME_FONT_DIR = '/usr/share/fonts/truetype/dejavu/';
+
+    const ALLOWED_FRAME_FONTS = [
+        'sans' => 'DejaVuSans.ttf',
+        'sans-bold' => 'DejaVuSans-Bold.ttf',
+        'serif' => 'DejaVuSerif.ttf',
+        'serif-bold' => 'DejaVuSerif-Bold.ttf',
+        'mono' => 'DejaVuSansMono.ttf',
+        'mono-bold' => 'DejaVuSansMono-Bold.ttf',
+    ];
+
+    private static function resolveFrameFont($fontKey) {
+        $file = self::ALLOWED_FRAME_FONTS[$fontKey] ?? self::ALLOWED_FRAME_FONTS['sans'];
+        $path = self::FRAME_FONT_DIR . $file;
+
+        return is_file($path) ? $path : null;
+    }
+
     /**
      * Renders an optional text label below the qr code. Only supported for raster
      * formats (png/jpg/jpeg/gif) via GD; a no-op for svg/svgbw/eps.
      */
-    private function addFrameText($path, $format, $text) {
+    private function addFrameText($path, $format, $text, $fontKey = 'sans', $fontSize = 16) {
         $text = trim((string) $text);
         $loaders = ['png' => 'imagecreatefrompng', 'jpg' => 'imagecreatefromjpeg', 'jpeg' => 'imagecreatefromjpeg', 'gif' => 'imagecreatefromgif'];
         $savers = ['png' => 'imagepng', 'jpg' => 'imagejpeg', 'jpeg' => 'imagejpeg', 'gif' => 'imagegif'];
@@ -85,6 +103,9 @@ class Qrcode {
             return;
         }
 
+        $fontFile = self::resolveFrameFont($fontKey);
+        $fontSize = min(max((int) $fontSize, 8), 60);
+
         $source = @$loaders[$format]($path);
         if ($source === false) {
             return;
@@ -92,7 +113,7 @@ class Qrcode {
 
         $width = imagesx($source);
         $height = imagesy($source);
-        $padding = 30;
+        $padding = $fontFile !== null ? $fontSize + 20 : 30;
 
         $canvas = imagecreatetruecolor($width, $height + $padding);
         $white = imagecolorallocate($canvas, 255, 255, 255);
@@ -100,15 +121,88 @@ class Qrcode {
         imagefill($canvas, 0, 0, $white);
         imagecopy($canvas, $source, 0, 0, 0, 0, $width, $height);
 
-        $font = 5;
-        $text_width = imagefontwidth($font) * strlen($text);
-        $x = max(0, (int) (($width - $text_width) / 2));
-        $y = $height + (int) (($padding - imagefontheight($font)) / 2);
-        imagestring($canvas, $font, $x, $y, $text, $black);
+        if ($fontFile !== null && function_exists('imagettftext')) {
+            $bbox = imagettfbbox($fontSize, 0, $fontFile, $text);
+            $text_width = abs($bbox[2] - $bbox[0]);
+            $text_height = abs($bbox[1] - $bbox[7]);
+            $x = max(0, (int) (($width - $text_width) / 2));
+            $y = $height + (int) (($padding + $text_height) / 2);
+            imagettftext($canvas, $fontSize, 0, $x, $y, $black, $fontFile, $text);
+        } else {
+            $font = 5;
+            $text_width = imagefontwidth($font) * strlen($text);
+            $x = max(0, (int) (($width - $text_width) / 2));
+            $y = $height + (int) (($padding - imagefontheight($font)) / 2);
+            imagestring($canvas, $font, $x, $y, $text, $black);
+        }
 
         $savers[$format]($canvas, $path);
 
         imagedestroy($source);
+        imagedestroy($canvas);
+    }
+
+    /**
+     * Renders an optional user-uploaded icon above the qr code (not embedded inside
+     * it, so scanability is unaffected). Only supported for raster formats via GD.
+     */
+    private function addTopIcon($path, $format, $iconPath) {
+        $loaders = ['png' => 'imagecreatefrompng', 'jpg' => 'imagecreatefromjpeg', 'jpeg' => 'imagecreatefromjpeg', 'gif' => 'imagecreatefromgif'];
+        $savers = ['png' => 'imagepng', 'jpg' => 'imagejpeg', 'jpeg' => 'imagejpeg', 'gif' => 'imagegif'];
+
+        if (!$iconPath || !is_file($iconPath) || !isset($loaders[$format]) || !is_file($path)) {
+            return;
+        }
+
+        $iconInfo = @getimagesize($iconPath);
+        $iconLoaders = [IMAGETYPE_PNG => 'imagecreatefrompng', IMAGETYPE_JPEG => 'imagecreatefromjpeg', IMAGETYPE_GIF => 'imagecreatefromgif'];
+
+        if ($iconInfo === false || !isset($iconLoaders[$iconInfo[2]])) {
+            return;
+        }
+
+        $source = @$loaders[$format]($path);
+        $icon = @$iconLoaders[$iconInfo[2]]($iconPath);
+
+        if ($source === false || $icon === false) {
+            return;
+        }
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+
+        $iconWidth = imagesx($icon);
+        $iconHeight = imagesy($icon);
+
+        $maxIconHeight = (int) ($height * 0.25);
+        $scale = min($maxIconHeight / $iconHeight, ($width * 0.6) / $iconWidth, 1);
+        $targetWidth = max(1, (int) ($iconWidth * $scale));
+        $targetHeight = max(1, (int) ($iconHeight * $scale));
+
+        $margin = 15;
+        $topPadding = $targetHeight + ($margin * 2);
+
+        $canvas = imagecreatetruecolor($width, $height + $topPadding);
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $white);
+
+        $resizedIcon = imagecreatetruecolor($targetWidth, $targetHeight);
+        imagealphablending($resizedIcon, false);
+        imagesavealpha($resizedIcon, true);
+        $transparent = imagecolorallocatealpha($resizedIcon, 0, 0, 0, 127);
+        imagefill($resizedIcon, 0, 0, $transparent);
+        imagealphablending($icon, true);
+        imagecopyresampled($resizedIcon, $icon, 0, 0, 0, 0, $targetWidth, $targetHeight, $iconWidth, $iconHeight);
+
+        $x = (int) (($width - $targetWidth) / 2);
+        imagecopy($canvas, $resizedIcon, $x, $margin, 0, 0, $targetWidth, $targetHeight);
+        imagecopy($canvas, $source, 0, $topPadding, 0, 0, $width, $height);
+
+        $savers[$format]($canvas, $path);
+
+        imagedestroy($source);
+        imagedestroy($icon);
+        imagedestroy($resizedIcon);
         imagedestroy($canvas);
     }
 
@@ -397,7 +491,12 @@ class Qrcode {
                 throw new \RuntimeException($e->getMessage());
             }
 
-            $this->addFrameText($filename, $fileExt, $input_data['frame_text'] ?? '');
+            $this->addTopIcon($filename, $fileExt, $input_data['icon_tmp_path'] ?? null);
+            $this->addFrameText($filename, $fileExt, $input_data['frame_text'] ?? '', $input_data['frame_font'] ?? 'sans', $input_data['frame_font_size'] ?? 16);
+
+            if (!empty($input_data['icon_tmp_path'])) {
+                @unlink($input_data['icon_tmp_path']);
+            }
 
             // If you want you can customi<e qr code with logo
             //$this->addLogo($data_to_db['qrcode'], $options['optionlogo']);

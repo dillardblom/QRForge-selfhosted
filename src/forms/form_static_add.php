@@ -105,4 +105,6 @@
                 </div>
               </div>
     </div><!-- /.card -->
+
+    <script src="dist/js/qrcode-style-tools.js?nocache=<?php print rand();?>"></script>
 </fieldset>
