@@ -21,7 +21,7 @@ services:
       php-dynamic-qrcode-db:
         condition: service_healthy
     volumes:
-      - php_dynamic_qrcode_saved_qrcode_data:/var/www/html/saved_qrcode
+      - php_dynamic_qrcode_saved_qrcode_data:/var/www/qrcode-storage
     networks:
       - php-dynamic-qrcode-network
 
