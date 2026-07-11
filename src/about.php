@@ -71,7 +71,7 @@ require_once BASE_PATH . '/includes/auth_validate.php';
                     <p>
                         Prefer to run your own instance? QRForge is MIT-licensed and available on
                         GitHub:
-                        <a href="https://github.com/dillardblom/QR-app-selfhosted" target="_blank">github.com/dillardblom/QR-app-selfhosted</a>.
+                        <a href="https://github.com/dillardblom/QRForge-selfhosted" target="_blank">github.com/dillardblom/QRForge-selfhosted</a>.
                     </p>
                 </div>
             </div>
