@@ -70,7 +70,7 @@ foreach ($createdQrcode_static as $row) {
 
 <!DOCTYPE html>
 <html lang="en">
-    <title>Qr Code Generator</title>
+    <title>QRForge</title>
     <head>
     <?php include './includes/head.php'; ?>
     </head>

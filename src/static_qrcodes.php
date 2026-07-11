@@ -29,7 +29,7 @@ $total_pages = $db->totalPages;
 
 <!DOCTYPE html>
 <html lang="en">
-    <title>Qrcode Generator</title>
+    <title>QRForge</title>
     <head>
     <?php include './includes/head.php'; ?>
     </head>

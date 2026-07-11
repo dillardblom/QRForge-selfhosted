@@ -51,7 +51,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["edit"])) {
 
 <!DOCTYPE html>
 <html lang="en">
-    <title>Qrcode Generator</title>
+    <title>QRForge</title>
     <head>
     <?php include './includes/head.php'; ?>
     </head>

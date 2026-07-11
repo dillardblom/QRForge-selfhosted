@@ -47,13 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<title>Change password - Qrcode Generator</title>
+<title>Change password - QRForge</title>
 <?php include './includes/head.php'; ?>
 
 <body class="login-page" style="min-height: 512.391px;">
     <div class="login-box">
   <div class="login-logo">
-    <img src="dist/img/DynamicQRCode_Original.png" style="width: 95%; height: 95%">
+    <img src="dist/img/brand/logo.svg" alt="QRForge" style="max-width: 260px;">
   </div>
 
   <div class="card">

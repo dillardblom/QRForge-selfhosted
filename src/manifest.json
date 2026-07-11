@@ -1,12 +1,12 @@
 {
-  "name": "Qrcode Generator",
-  "short_name": "QRcode",
+  "name": "QRForge",
+  "short_name": "QRForge",
   "description": "Self-hosted static and dynamic qr code generator",
   "start_url": "index.php",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#007bff",
+  "theme_color": "#2563EB",
   "icons": [
     { "src": "dist/img/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "dist/img/icon-512.png", "sizes": "512x512", "type": "image/png" }

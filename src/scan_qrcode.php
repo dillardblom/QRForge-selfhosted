@@ -4,7 +4,7 @@ require_once BASE_PATH . '/includes/auth_validate.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
-    <title>Qrcode Generator</title>
+    <title>QRForge</title>
     <head>
     <?php include './includes/head.php'; ?>
     </head>

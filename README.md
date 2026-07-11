@@ -1,65 +1,69 @@
-<p align="center"><img src="https://www.giandonatoinverso.it/qrcode/dist/img/DynamicQRCode_Original.png"></p>
+<p align="center"><img src="src/dist/img/brand/logo.svg" alt="QRForge" width="320"></p>
 
-**PHP Dynamic Qr code** is a script that allows the generation and saving of dynamic and static QR codes. It has a clean, responsive, and user-friendly design. It is based on [AdminLte](https://adminlte.io/), the "Best open source admin dashboard & control panel theme. Built on top of Bootstrap" and [Core PHP Admin Panel](https://github.com/chetans9/core-php-admin-panel), a simple Admin Panel written in core PHP that contains an implementation of general features you might need in your website admin panel like: record management (CRUD), secure authentication, pagination, filters.
+<p align="center"><strong>Self-hosted, open-source QR code generator.</strong></p>
 
-[LIVE DEMO](https://qrcode.giandonatoinverso.dev/)
+**QRForge** creates and manages static and dynamic QR codes from a clean,
+responsive control panel. It's a security-hardened, actively maintained fork
+of the original [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code)
+project by Giandonato Inverso, built on [AdminLTE](https://adminlte.io/).
 
-username: admin
-
-password: admin
-
-[DOCUMENTATION](https://giandonatoinverso.it/qrcode/documentation)
+- **Try it free:** [qr.ensembia.com](https://qr.ensembia.com) - fully functional OSS test
+  instance, register your own account any time.
+- **Commercial VIP edition** (self-service create-rights, logo-embedded QR codes):
+  [www.qrforge.eu](https://www.qrforge.eu).
+- **Self-host it yourself:** this repository, MIT-licensed.
 
 # Features
 
-- **#1 Dynamic Qr code generator on GitHub with a database to store Qr codes**
-- Create unlimited Qr codes
-- Docker compose support
-- Control panel with 2 access levels
-- Multi-account 
-- Dashboard with advanced statistics on Qr codes created and on scans
-- Bulk download, bulk delete
-- Dynamic Qr code
-    - Create, modify, and delete Qr codes
-    - You can download your Qr codes when you want
-    - URL shortener with redirect
-    - Enable or disable the link redirect
-- Static Qr code
-    - Text QR Code
-    - Email QR Code
-    - Phone QR Code
-    - Sms QR Code
-    - Whatsapp QR Code
-    - Skype QR Code
-    - Location QR Code
-    - Vcard QR Code
-    - Event/calendar QR Code
-    - Bookmark QR Code
-    - Wifi QR Code
-    - Paypal QR Code
-    - Bitcoin QR Code
-- Customization of Qr codes
-    - 6 formats for images
-    - Foreground color
-    - Background color
-    - 4 levels of precision
-    - 10 sizes
-- Responsive bootstrap-based design
-- Easy to understand and expand code
-- Full OOP with classes and well-documented
+- Dynamic QR codes with a database-backed URL shortener
+    - Create, edit, delete, enable/disable the redirect
+    - Download any time, bulk download/delete
+    - Batch-generate from a CSV file
+- 16 static QR code types: Text, Email, Phone, SMS, WhatsApp, Skype, Location,
+  vCard, Event/calendar, Bookmark, WiFi (incl. WPA3), PayPal, Bitcoin, 2FA,
+  App Link (Android intent / universal links), Bluetooth
+- QR code styling: 6 export formats, foreground/background color, 4 precision
+  levels, 10 sizes, optional label text below the code (custom font + size),
+  optional icon shown above the code, save/load your own style presets
+- Address search (OpenStreetMap Nominatim) for Location QR codes
+- Built-in QR scanner (camera or image upload, decodes entirely client-side)
+- Installable as a PWA
+- Role-based access: `super` (full access + user management), `admin`
+  (scoped to their own codes and sub-users), `user` (read-only, with
+  optional per-account create rights and view toggles set by an admin)
+- Dashboard with QR/scan statistics and a 7-day activity chart
+- CSRF protection, login rate limiting, session hardening, audit log
+- Docker Compose setup, both a dev image and a production Nginx + PHP-FPM image
 
-## What is included
+# What is included
 
-- PHP files
-- .sql file with sample data
-- JS files
-- CSS files
-- Docker compose file
+- PHP 8.4 application source
+- Database schema + migrations
+- Docker Compose files (dev and production)
+- CSS/JS assets
 
-## Setup with docker compose
-1. download docker-compose.yml file
-2. Start docker stack
-```bash
-docker compose build --no-cache && docker compose up -d
-```
-3. Open your browser at http://localhost:80 and login with (username: superadmin, password: superadmin)
+# Setup with Docker Compose
+
+1. Clone this repository.
+2. Copy `.env.example` to `.env` and set a real `DATABASE_PASSWORD` /
+   `MYSQL_ROOT_PASSWORD`.
+3. Start the stack:
+   ```bash
+   docker compose up -d --build
+   ```
+4. Open `http://localhost` and log in with `superadmin` / `superadmin`. You'll
+   be required to set a new password on first login.
+
+For a production deployment behind a reverse proxy, use
+`docker-compose.prod.yml` (Nginx + PHP-FPM) instead of the dev stack.
+
+# Credits
+
+- Originally forked from [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code)
+  by Giandonato Inverso.
+- QR code rendering powered by [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode).
+- Admin panel UI built on [AdminLTE](https://adminlte.io/).
+
+# License
+
+MIT - see [LICENSE](LICENSE).

@@ -6,9 +6,10 @@
 
   <!-- Main Footer -->
   <footer class="main-footer text-sm">
-    <strong><a href="https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code" target="_blank">PHP Qrcode Generator</a> by </strong> Giandonato Inverso
+    <strong><a href="https://www.qrforge.eu" target="_blank">QRForge</a></strong> -
+    <a href="./about.php">About</a> / credits
     <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 2.3.0
+      <b>Version</b> 3.0
     </div>
   </footer>
 </div>

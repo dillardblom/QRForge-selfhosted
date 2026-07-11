@@ -2,9 +2,9 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="./index.php" class="brand-link">
-      <img src="dist/img/Symbol_WhiteBlue.png" alt="Logo" class="brand-image"
+      <img src="dist/img/brand/icon-inverse.svg" alt="QRForge" class="brand-image"
            style="opacity: .8">
-      <span class="brand-text font-weight-light">Qrcode Generator</span>
+      <span class="brand-text font-weight-light">QRForge</span>
     </a>
 
     <!-- Sidebar -->
@@ -109,6 +109,12 @@
             </a>
           </li>
           <?php endif; ?>
+          <li class="nav-item">
+            <a href="./about.php" <?php echo (CURRENT_PAGE == 'about.php') ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
+                <i class="fas fa-info-circle nav-icon"></i>
+              <p>About</p>
+            </a>
+          </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
