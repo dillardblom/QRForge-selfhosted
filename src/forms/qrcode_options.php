@@ -58,7 +58,7 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
     <div class="col-sm-12 mb-2">
         <div class="row">
             <div class="col-6 col-md-3">
-                <label>&nbsp;</label>
+                <label>Randomize</label>
                 <button type="button" id="random_style_btn" class="btn btn-outline-secondary btn-block">
                     <i class="fa fa-dice"></i> Random style
                 </button>

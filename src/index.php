@@ -120,29 +120,33 @@ foreach ($createdQrcode_static as $row) {
                                 </div><!-- /.col -->
                                     
                                 <div class="col-12 col-sm-6 col-md-3">
-                                    <div class="info-box mb-3 bg-success">
-                                        <span class="info-box-icon"><i class="fa fa-qrcode"></i></span>
+                                    <a href="dynamic_qrcodes.php" class="d-block">
+                                        <div class="info-box mb-3 bg-success">
+                                            <span class="info-box-icon"><i class="fa fa-qrcode"></i></span>
 
-                                        <div class="info-box-content">
-                                            <span class="info-box-text">Dynamic Qr codes</span>
-                                            <span class="info-box-number"><?php echo $numQrcode_dynamic; ?></span>
-                                        </div><!-- /.info-box-content -->
-                                    </div>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Dynamic Qr codes</span>
+                                                <span class="info-box-number"><?php echo $numQrcode_dynamic; ?></span>
+                                            </div><!-- /.info-box-content -->
+                                        </div>
+                                    </a>
                                 </div><!-- /.col -->
 
                                 <!-- fix for small devices only -->
                                 <div class="clearfix hidden-md-up"></div>
 
                                 <div class="col-12 col-sm-6 col-md-3">
-                                    <div class="info-box mb-3 bg-danger">
-                                        <span class="info-box-icon"><i class="fa fa-qrcode"></i></span>
+                                    <a href="static_qrcodes.php" class="d-block">
+                                        <div class="info-box mb-3 bg-danger">
+                                            <span class="info-box-icon"><i class="fa fa-qrcode"></i></span>
 
-                                        <div class="info-box-content">
-                                            <span class="info-box-text">Static QR codes</span>
-                                            <span class="info-box-number"><?php echo $numQrcode_static; ?></span>
-                                        </div><!-- /.info-box-content -->
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Static QR codes</span>
+                                                <span class="info-box-number"><?php echo $numQrcode_static; ?></span>
+                                            </div><!-- /.info-box-content -->
 
-                                    </div>
+                                        </div>
+                                    </a>
                                 </div><!-- /.col -->
                                 
                                 <div class="col-12 col-sm-6 col-md-3">

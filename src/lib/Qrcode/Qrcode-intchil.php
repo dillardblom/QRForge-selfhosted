@@ -174,7 +174,7 @@ class Qrcode {
         $iconWidth = imagesx($icon);
         $iconHeight = imagesy($icon);
 
-        $maxIconHeight = (int) ($height * 0.25);
+        $maxIconHeight = (int) ($height * 0.625);
         $scale = min($maxIconHeight / $iconHeight, ($width * 0.6) / $iconWidth, 1);
         $targetWidth = max(1, (int) ($iconWidth * $scale));
         $targetHeight = max(1, (int) ($iconHeight * $scale));

@@ -95,9 +95,18 @@
         });
 
         document.querySelectorAll('#foreground, #background').forEach(function (input) {
-            input.addEventListener('change', function () {
-                updateStylePreview(scopeOf(input));
-            });
+            // bootstrap-colorpicker sets the value and fires 'change' via jQuery's
+            // synthetic .trigger(), which a native addEventListener never sees - so the
+            // preview only updates via jQuery's event binding, not the native one below.
+            if (window.jQuery) {
+                jQuery(input).on('change', function () {
+                    updateStylePreview(scopeOf(input));
+                });
+            } else {
+                input.addEventListener('change', function () {
+                    updateStylePreview(scopeOf(input));
+                });
+            }
         });
 
         document.querySelectorAll('select[name="level"]').forEach(function (select) {
