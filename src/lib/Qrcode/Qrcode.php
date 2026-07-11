@@ -192,9 +192,12 @@ class Qrcode {
     }
 
     public function getQrcode($id) {
+        require_once BASE_PATH . '/includes/security.php';
+
         $db = getDbInstance();
 
         $db->where('id', $id);
+        qr_apply_owner_scope($db);
         $result = $db->getOne($this->table);
 
         if($result !== NULL)
@@ -376,6 +379,7 @@ class Qrcode {
 
         if(!file_exists(SAVED_QRCODE_DIRECTORY.$data_to_db['filename'].'.'.$old_qrcode["format"]) || $data_to_db['filename'] == $input_data["old_filename"]){
             $db->where('id', $input_data["id"]);
+            qr_apply_owner_scope($db);
             $stat = $db->update($this->table, $data_to_db);
             
             try{
@@ -408,6 +412,7 @@ class Qrcode {
         $qrcode = $this->getQrcode($id);
 
         $db->where('id', $id);
+        qr_apply_owner_scope($db);
         $status = $db->delete($this->table);
 
         if ($status) {
