@@ -1,5 +1,5 @@
 services:
-  php-dynamic-qrcode:
+  qrforge-app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -8,7 +8,7 @@ services:
       TYPE: "${TYPE:-docker}"
       QRCODE_GENERATOR: "${QRCODE_GENERATOR:-internal-chillerlan.qrcode}"
       BASE_URL: "${BASE_URL:-http://localhost}"
-      DATABASE_HOST: "php-dynamic-qrcode-db"
+      DATABASE_HOST: "qrforge-db"
       DATABASE_PORT: "3306"
       DATABASE_NAME: "${DATABASE_NAME:-qrcode}"
       DATABASE_USER: "${DATABASE_USER:-qrcode}"
@@ -18,18 +18,18 @@ services:
     ports:
       - "80:80"
     depends_on:
-      php-dynamic-qrcode-db:
+      qrforge-db:
         condition: service_healthy
     volumes:
-      - php_dynamic_qrcode_saved_qrcode_data:/var/www/qrcode-storage
+      - qrforge_qrcode_storage:/var/www/qrcode-storage
     networks:
-      - php-dynamic-qrcode-network
+      - qrforge-network
 
-  php-dynamic-qrcode-db:
+  qrforge-db:
     image: "mysql:8.0"
     restart: "unless-stopped"
     volumes:
-      - php_dynamic_qrcode_db_data:/var/lib/mysql
+      - qrforge_db_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?zet MYSQL_ROOT_PASSWORD in .env}"
@@ -42,12 +42,12 @@ services:
       timeout: 5s
       retries: 10
     networks:
-      - php-dynamic-qrcode-network
+      - qrforge-network
 
 volumes:
-  php_dynamic_qrcode_db_data:
-  php_dynamic_qrcode_saved_qrcode_data:
+  qrforge_db_data:
+  qrforge_qrcode_storage:
 
 networks:
-  php-dynamic-qrcode-network:
+  qrforge-network:
     driver: bridge
