@@ -117,15 +117,7 @@
     </div>
     
 <div class="col-sm-12 mb-2">
-  <div class="row">    
-    <div class="col-sm-4">
-        <div class="form-group">
-            <label for="filename">Filename *</label>
-            <input type="text" name="filename" value="" placeholder="My first Qrcode" class="form-control error" required="required" id="filename">
-          
-        </div>
-    </div>
-    
+  <div class="row">
     <div class="col-6 col-md-1">
                 <label for="format">Format *</label>
                 <select name="format" class="form-control" required="required">
@@ -177,13 +169,20 @@
   </div>
 </div>
 
-    <?php if($_SESSION['type'] ===  'super') { ?>
     <div class="col-sm-12 mb-2">
         <div class="row">
             <div class="col-sm-4">
                 <div class="form-group">
+                    <label for="filename">Filename *</label>
+                    <input type="text" name="filename" value="" placeholder="My first Qrcode" class="form-control error" required="required" id="filename">
+                </div>
+            </div>
+
+            <?php if ($_SESSION['type'] === 'super') { ?>
+            <div class="col-sm-4">
+                <div class="form-group">
                     <label for="id_owner">Owner *</label>
-                    <select name="id_owner" class="form-control">
+                    <select name="id_owner" id="id_owner" class="form-control">
                         <option value="">All (shared with every admin)</option>
                         <?php
 
@@ -199,9 +198,9 @@
                     </select>
                 </div>
             </div>
+            <?php } else { ?>
+            <input type="hidden" name="id_owner" value="<?php echo $_SESSION["user_id"];?>"/>
+            <?php } ?>
         </div>
     </div>
-    <?php } else { ?>
-        <input type="hidden" name="id_owner" value="<?php echo $_SESSION["user_id"];?>"/>
-    <?php } ?>
 </fieldset>
