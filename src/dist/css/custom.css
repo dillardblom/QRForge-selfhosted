@@ -7,3 +7,20 @@
     display: none;
     color: red;
 }
+
+/* List-page qr code thumbnails: fixed box, but object-fit:contain instead of
+   width/height attrs so taller images (e.g. icon-above-qr) don't get squashed. */
+.qr-thumb-link {
+    display: inline-block;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+.qr-thumb-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid #dee2e6;
+}

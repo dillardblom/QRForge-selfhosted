@@ -53,20 +53,20 @@
             <ul class="nav nav-treeview">
               <li class="nav-item">
                 <a href="./dynamic_qrcodes.php" <?php echo ((substr(CURRENT_PAGE, 0, 19) == 'dynamic_qrcodes.php')) ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
-                  <i class="far fa-circle nav-icon"></i>
+                  <i class="fas fa-angle-right nav-icon"></i>
                   <p>List all</p>
                 </a>
               </li>
               <?php if ($_SESSION['type'] !== 'user'): ?>
               <li class="nav-item">
                 <a href="./dynamic_qrcode.php" <?php echo (CURRENT_PAGE == 'dynamic_qrcode.php') ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
-                  <i class="far fa-circle nav-icon"></i>
+                  <i class="fas fa-angle-right nav-icon"></i>
                   <p>Add new</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="./batch_qrcode.php" <?php echo (CURRENT_PAGE == 'batch_qrcode.php') ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
-                  <i class="far fa-circle nav-icon"></i>
+                  <i class="fas fa-angle-right nav-icon"></i>
                   <p>Batch create (CSV)</p>
                 </a>
               </li>
@@ -86,14 +86,14 @@
                 <ul class="nav nav-treeview">
                     <li class="nav-item">
                         <a href="./static_qrcodes.php" <?php echo ((substr(CURRENT_PAGE, 0, 18) == 'static_qrcodes.php')) ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
-                            <i class="far fa-circle nav-icon"></i>
+                            <i class="fas fa-angle-right nav-icon"></i>
                             <p>List all</p>
                         </a>
                     </li>
                     <?php if ($_SESSION['type'] !== 'user'): ?>
                     <li class="nav-item">
                         <a href="./static_qrcode.php" <?php echo (CURRENT_PAGE == 'static_qrcode.php') ? ' class="nav-link active"' : ' class="nav-link"'; ?>>
-                            <i class="far fa-circle nav-icon"></i>
+                            <i class="fas fa-angle-right nav-icon"></i>
                             <p>Add new</p>
                         </a>
                     </li>

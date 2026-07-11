@@ -68,7 +68,11 @@
                 <td><?php echo htmlspecialchars($row['type']); ?></td>
                 <td><?php echo htmlspecialchars_decode($row['content']); ?></td>
                 <td>
-                    <?php echo '<img src="qrcode_image.php?type=static&id='.$row['id'].'" width="100" height="100">'; ?>
+                    <a href="#" class="qr-thumb-link" data-toggle="modal" data-target="#preview-modal"
+                       data-qr-src="qrcode_image.php?type=static&id=<?php echo $row['id']; ?>"
+                       data-qr-name="<?php echo htmlspecialchars($row['filename']); ?>">
+                        <img src="qrcode_image.php?type=static&id=<?php echo $row['id']; ?>" class="qr-thumb-img" alt="QR code for <?php echo htmlspecialchars($row['filename']); ?>">
+                    </a>
                 </td>
                 <td>
                     <?php if (!$is_readonly_user): ?>
@@ -130,6 +134,32 @@
 </div>
 <!-- /.Delete Confirmation Modal -->
 <?php endif; ?>
+
+<!-- Qr Code Preview Modal -->
+<div class="modal fade" id="preview-modal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="preview-modal-title">QR code preview</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="preview-modal-img" src="" alt="" style="max-width:100%;max-height:70vh;">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.Qr Code Preview Modal -->
+
+<script>
+    document.querySelectorAll('.qr-thumb-link').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('preview-modal-img').src = link.getAttribute('data-qr-src');
+            document.getElementById('preview-modal-title').textContent = link.getAttribute('data-qr-name');
+        });
+    });
+</script>
 
 <script>
     const deleteButtons = document.querySelectorAll('.delete_btn');
