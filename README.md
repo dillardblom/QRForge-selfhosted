@@ -8,7 +8,8 @@ of the original [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-D
 project by Giandonato Inverso, built on [AdminLTE](https://adminlte.io/).
 
 - **Try it free:** [qr.ensembia.com](https://qr.ensembia.com) - fully functional OSS test
-  instance, register your own account any time.
+  instance. Self-service signup isn't live yet, so log in with the temporary shared demo
+  account `admin` / `admin` in the meantime.
 - **Commercial VIP edition** (self-service create-rights, logo-embedded QR codes):
   [www.qrforge.eu](https://www.qrforge.eu).
 - **Self-host it yourself:** this repository, MIT-licensed.

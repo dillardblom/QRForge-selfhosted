@@ -114,23 +114,6 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
 
 <div class="col-sm-12 mb-2">
   <div class="row">
-    <div class="col-6 col-md-1">
-                <label for="format">Format</label>
-                <select name="format" class="form-control">
-                    <option value="png">PNG</option>
-                    <option value="gif">GIF</option>
-                    <option value="jpeg">JPEG</option>
-                    <option value="jpg">JPG</option>
-                    <option value="svg">SVG</option>
-<?php
-if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
-    echo '                    <option value="svgbw">SVG (BW)</option>';
-}
-?>
-                    <option value="eps">EPS</option>
-                </select>
-    </div>
-
     <div class="col-sm-4">
         <div class="form-group">
             <label for="frame_text">Frame text</label>
@@ -177,6 +160,23 @@ if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
                 <label for="filename">Filename *</label>
                 <input type="text" name="filename" value="" placeholder="My first Qrcode" class="form-control error" required="required" id="filename">
             </div>
+        </div>
+
+        <div class="col-6 col-md-1">
+                <label for="format">Format</label>
+                <select name="format" class="form-control">
+                    <option value="png">PNG</option>
+                    <option value="gif">GIF</option>
+                    <option value="jpeg">JPEG</option>
+                    <option value="jpg">JPG</option>
+                    <option value="svg">SVG</option>
+<?php
+if (QRCODE_GENERATOR === "internal-chillerlan.qrcode") {
+    echo '                    <option value="svgbw">SVG (BW)</option>';
+}
+?>
+                    <option value="eps">EPS</option>
+                </select>
         </div>
 
         <?php if ($_SESSION['type'] === 'super') { ?>

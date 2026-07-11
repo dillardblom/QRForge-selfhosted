@@ -177,12 +177,18 @@ function qr_has_full_visibility() {
 /**
  * Apply the current session's owner scope to a MysqliDb query builder in place.
  * No-op when the session has full visibility.
+ *
+ * Uses a single raw, parenthesized condition rather than where()+orWhere() -
+ * the previous two-call form produced "WHERE id = ? AND id_owner = ? OR id_owner
+ * IS NULL" whenever a caller had already added its own where('id', ...) (e.g.
+ * qrcode_image.php, bulk_action.php), and AND binds tighter than OR in SQL, so
+ * the OR silently detached from the id filter and matched *any* id_owner-NULL
+ * row instead of the one actually requested.
  */
 function qr_apply_owner_scope($db) {
     $scope_owner_id = qr_scope_owner_id();
     if ($scope_owner_id !== null) {
-        $db->where('id_owner', $scope_owner_id);
-        $db->orWhere('id_owner', NULL, 'IS');
+        $db->where('(id_owner = ' . (int) $scope_owner_id . ' OR id_owner IS NULL)');
     }
 }
 
