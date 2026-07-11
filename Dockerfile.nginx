@@ -1,0 +1,14 @@
+FROM nginx:1.27-alpine
+
+# The php-dynamic-qrcode container builds the full app (incl. composer/vendor) into its
+# own image at /var/www/html. nginx runs as a separate container and has no access to
+# that filesystem, so it needs its own copy of just the static assets it serves directly
+# via try_files - everything else (*.php) is proxied to php-fpm regardless. Without this,
+# every static asset request (CSS/JS/manifest) falls through nginx's try_files to
+# index.php, which requires a login and silently redirects there instead of serving the
+# file.
+COPY src/dist /var/www/html/dist
+COPY src/plugins /var/www/html/plugins
+COPY src/manifest.json /var/www/html/manifest.json
+COPY src/service-worker.js /var/www/html/service-worker.js
+COPY src/favicon.ico /var/www/html/favicon.ico
