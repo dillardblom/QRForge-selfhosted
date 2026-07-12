@@ -160,7 +160,14 @@ class Users
             'edit' => "true",
         ));
 
-        $requested_type = $_SESSION['type'] === 'admin' ? 'user' : ($input_data['type'] ?? '');
+        $is_self_edit = (int) $input_data['id'] === (int) $_SESSION['user_id'];
+
+        // A user editing their own account keeps their current type, even if a
+        // different value was submitted - prevents accidentally (or deliberately)
+        // locking yourself out by downgrading your own access level.
+        $requested_type = $_SESSION['type'] === 'admin'
+            ? 'user'
+            : ($is_self_edit ? $target['type'] : ($input_data['type'] ?? ''));
 
         $validation_error = $this->validateUsernameAndType($input_data['username'] ?? '', $requested_type);
         if ($validation_error !== null) {

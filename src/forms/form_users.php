@@ -26,25 +26,29 @@
     </div>
 
     <?php if ($_SESSION['type'] === 'super'): ?>
+    <?php $editing_self = $edit && (int) $user['id'] === (int) $_SESSION['user_id']; ?>
     <div class="col-sm-4">
         <label for="user-type">User type *</label>
 
         <div class="form-group">
             <div class="radio">
                 <label class="radio">
-                <input type="radio" name="type" value="super" required="required" <?php echo ($edit && $user['type'] =='super') ? "checked": "" ; ?>/> Super admin</label>
+                <input type="radio" name="type" value="super" required="required" <?php echo ($edit && $user['type'] =='super') ? "checked": "" ; ?> <?php echo $editing_self ? "disabled" : ""; ?>/> Super admin</label>
             </div>
 
             <div class="radio">
                 <label class="radio">
-                <input type="radio" name="type" value="admin" required="required" <?php echo ($edit && $user['type'] =='admin') ? "checked": "" ; ?>/> Admin</label>
+                <input type="radio" name="type" value="admin" required="required" <?php echo ($edit && $user['type'] =='admin') ? "checked": "" ; ?> <?php echo $editing_self ? "disabled" : ""; ?>/> Admin</label>
             </div>
 
             <div class="radio">
                 <label class="radio">
-                <input type="radio" name="type" value="user" required="required" id="type-user" <?php echo ($edit && $user['type'] =='user') ? "checked": "" ; ?>/> User (read-only)</label>
+                <input type="radio" name="type" value="user" required="required" id="type-user" <?php echo ($edit && $user['type'] =='user') ? "checked": "" ; ?> <?php echo $editing_self ? "disabled" : ""; ?>/> User (read-only)</label>
             </div>
         </div>
+        <?php if ($editing_self): ?>
+        <small class="form-text text-muted">You can't change your own access level.</small>
+        <?php endif; ?>
     </div>
 
     <div class="col-sm-12 mt-2" id="user-view-toggles">
