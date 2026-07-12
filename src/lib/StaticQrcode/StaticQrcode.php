@@ -171,7 +171,7 @@ class StaticQrcode {
      * create a qr code of type "vcard"
      * 
      */
-    public function vcardQrcode($fullname, $nickname, $email, $website, $phone, $home_phone, $work_phone, $company, $role, $categories, $note, $photo, $address, $city, $postcode, $state)
+    public function vcardQrcode($fullname, $nickname, $email, $website, $phone, $home_phone, $work_phone, $company, $role, $categories, $note, $photo, $address, $city, $postcode, $state, $country)
     {
         if($fullname != NULL && $phone != NULL){
             
@@ -188,7 +188,7 @@ class StaticQrcode {
             $vcard->categories($categories); 
             $vcard->note($note); 
             $vcard->photo($photo); 
-            $vcard->address($address, $city, $postcode, $state); 
+            $vcard->address($address, $city, $state, $postcode, $country);
             $vcard->create();
             
             $this->sData = $vcard->get();
@@ -202,7 +202,7 @@ class StaticQrcode {
                 
             $this->sContent .= '<div class="col-sm-4">';
             
-                $this->sContent .= '<strong>Phone:</strong> '.$phone.'<br>'.'<strong>Home Phone:</strong> '.$home_phone.'<br>'.'<strong>Work phone:</strong> '.$work_phone.'<br>'.'<strong>Address:</strong> '.$address.'&nbsp;'.$city.'&nbsp;'.$postcode.'&nbsp;'.$state.'</div>';
+                $this->sContent .= '<strong>Phone:</strong> '.$phone.'<br>'.'<strong>Home Phone:</strong> '.$home_phone.'<br>'.'<strong>Work phone:</strong> '.$work_phone.'<br>'.'<strong>Address:</strong> '.$address.'&nbsp;'.$city.'&nbsp;'.$postcode.'&nbsp;'.$state.'&nbsp;'.$country.'</div>';
             
             $this->sContent .= '</div>';
 

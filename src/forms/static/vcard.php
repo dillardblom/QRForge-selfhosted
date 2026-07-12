@@ -138,7 +138,14 @@
             <input type="text" name="state" value="" placeholder="" class="form-control">
         </div>
     </div>
-    
+
+    <div class="col-6 col-md-3">
+        <div class="form-group">
+            <label>Country</label>
+            <input type="text" name="country" value="" placeholder="" class="form-control">
+        </div>
+    </div>
+
     </div>
 </div>
 

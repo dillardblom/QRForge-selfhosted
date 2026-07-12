@@ -65,7 +65,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["edit"]) && !isset($_P
         case 'location':     $static_qrcode_instance->locationQrcode($_POST['latitude'], $_POST['longitude']);
             break;
 
-        case 'vcard':        $static_qrcode_instance->vcardQrcode($_POST['full_name'], $_POST['nickname'], $_POST['email'], $_POST['website'], $_POST['phone'], $_POST['home_phone'], $_POST['work_phone'], $_POST['company'], $_POST['role'], $_POST['categories'], $_POST['note'], $_POST['photo'], $_POST['address'], $_POST['city'], $_POST['post_code'], $_POST['state']);
+        case 'vcard':        $static_qrcode_instance->vcardQrcode($_POST['full_name'], $_POST['nickname'], $_POST['email'], $_POST['website'], $_POST['phone'], $_POST['home_phone'], $_POST['work_phone'], $_POST['company'], $_POST['role'], $_POST['categories'], $_POST['note'], $_POST['photo'], $_POST['address'], $_POST['city'], $_POST['post_code'], $_POST['state'], $_POST['country']);
             break;
 
         case 'event':        $static_qrcode_instance->eventQrcode($_POST['title'], $_POST['start'], $_POST['end'], $_POST['timezone'], $_POST['location'], $_POST['description'], $_POST['url']);

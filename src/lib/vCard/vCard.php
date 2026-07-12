@@ -43,10 +43,11 @@ class vCard
      *
      * @return self
      */
-    public function address($sAddress, $sCity, $sPostcode, $sState)
+    public function address($sAddress, $sCity, $sState, $sPostcode, $sCountry)
     {
+        // Component order per vCard 4.0 ADR: pobox;ext;street;locality;region;code;country
         $this->sData .= 'ADR:;;'.$sAddress.';';
-        $this->sData .= $sCity.';'.$sPostcode.';'.$sState."\n";
+        $this->sData .= $sCity.';'.$sState.';'.$sPostcode.';'.$sCountry."\n";
         return $this;
     }
 
