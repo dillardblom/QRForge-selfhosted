@@ -75,6 +75,7 @@ RUN cd /opt \
   && rm /opt/composer-setup.php /opt/composer-setup.sha384sum
 
 RUN docker-php-source extract
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install pdo_mysql zip exif pcntl gd
 RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 RUN docker-php-ext-install gettext && docker-php-ext-enable gettext
