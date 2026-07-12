@@ -10,8 +10,11 @@ project by Giandonato Inverso, built on [AdminLTE](https://adminlte.io/).
 - **Try it free:** [qr.ensembia.com](https://qr.ensembia.com) - fully functional OSS test
   instance. Self-service signup isn't live yet, so log in with the temporary shared demo
   account `admin` / `admin` in the meantime.
-- **Commercial VIP edition** (self-service create-rights, logo-embedded QR codes):
-  [www.qrforge.eu](https://www.qrforge.eu).
+- **Commercial VIP edition:** the ability to give sub-users the ability to create
+  QR codes as well, from their own (sub)account. If you have a bigger organisation,
+  having more users being able to create new QR codes delegates your workload. To
+  fund our open-source project, a small fee (€49/year subscription per organisation
+  ("tenant")) is requested for this. [www.qrforge.eu](https://www.qrforge.eu).
 - **Self-host it yourself:** this repository, MIT-licensed.
 
 # Features
@@ -31,7 +34,8 @@ project by Giandonato Inverso, built on [AdminLTE](https://adminlte.io/).
 - Installable as a PWA
 - Role-based access: `super` (full access + user management), `admin`
   (scoped to their own codes and sub-users), `user` (read-only, with
-  optional per-account create rights and view toggles set by an admin)
+  optional view toggles set by an admin; per-account create rights are
+  a VIP-edition feature, not available in this OSS version)
 - Dashboard with QR/scan statistics and a 7-day activity chart
 - CSRF protection, login rate limiting, session hardening, audit log
 - Docker Compose setup, both a dev image and a production Nginx + PHP-FPM image
