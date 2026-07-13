@@ -21,7 +21,7 @@ services:
       qrforge-db:
         condition: service_healthy
     volumes:
-      - qrforge_qrcode_storage:/var/www/qrcode-storage
+      - ./data/qrcode-storage:/var/www/qrcode-storage
     networks:
       - qrforge-network
 
@@ -29,7 +29,7 @@ services:
     image: "mysql:8.0"
     restart: "unless-stopped"
     volumes:
-      - qrforge_db_data:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?zet MYSQL_ROOT_PASSWORD in .env}"
@@ -43,10 +43,6 @@ services:
       retries: 10
     networks:
       - qrforge-network
-
-volumes:
-  qrforge_db_data:
-  qrforge_qrcode_storage:
 
 networks:
   qrforge-network:
