@@ -1,6 +1,5 @@
 <form class="form" action="static_qrcode.php?type=bluetooth" method="post" id="static_form" enctype="multipart/form-data">
 <?php echo csrf_field(); ?>
-    <?php include BASE_PATH.'/forms/qrcode_options.php'; ?>
 <!-- Input forms -->
 <div class="col-sm-12 mb-2">
     <small class="form-text text-muted mb-2">
@@ -26,6 +25,7 @@
     </div>
 </div>
 
+    <?php include BASE_PATH.'/forms/qrcode_options.php'; ?>
 <div class="col-sm-12 mb-2">
     <div class="row">
         <div class="col-6 col-md-3">
