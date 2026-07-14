@@ -40,6 +40,7 @@ if (isset($_COOKIE['series_id']) && isset($_COOKIE['remember_token']))
 			$_SESSION['type'] = $row['type'];
 			$_SESSION['username'] = $row['username'];
 			$_SESSION['must_change_password'] = !empty($row['must_change_password']);
+			$_SESSION['must_set_email'] = !empty($row['must_set_email']);
 			$_SESSION['can_view_static'] = !empty($row['can_view_static']);
 			$_SESSION['can_view_dynamic'] = !empty($row['can_view_dynamic']);
 			$_SESSION['scope_owner_id'] = qr_compute_scope_owner_id($row);
@@ -81,10 +82,12 @@ if (isset($_COOKIE['series_id']) && isset($_COOKIE['remember_token']))
     <div class="card-body login-card-body">
       <p class="login-box-msg">Sign in to start your session</p>
 
+      <?php include './includes/flash_messages.php'; ?>
+
       <form method="POST" action="authenticate.php">
         <?php echo csrf_field(); ?>
         <div class="input-group mb-3">
-          <input type="text" name="username" class="form-control" placeholder="Username" required="required">
+          <input type="text" name="email" class="form-control" placeholder="Email" required="required">
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fa fa-user"></span>
@@ -132,8 +135,11 @@ if (isset($_COOKIE['series_id']) && isset($_COOKIE['remember_token']))
 			   </div>	
 			</div>	
 				<?php endif; ?>
-      
-      
+
+      <?php if (ALLOW_SELF_REGISTRATION): ?>
+          <p class="mt-3 text-center"><a href="register.php">Register for free</a></p>
+      <?php endif; ?>
+
     </div>
     <!-- /.login-card-body -->
   </div>

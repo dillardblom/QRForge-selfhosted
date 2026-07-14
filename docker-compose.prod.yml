@@ -31,6 +31,15 @@ services:
       DATABASE_PASSWORD: "${DATABASE_PASSWORD:?set DATABASE_PASSWORD in .env}"
       DATABASE_PREFIX: "${DATABASE_PREFIX:-}"
       DATABASE_CHARSET: "${DATABASE_CHARSET:-utf8}"
+      ALLOW_SELF_REGISTRATION: "${ALLOW_SELF_REGISTRATION:-false}"
+      MAIL_HOST: "${MAIL_HOST:-}"
+      MAIL_PORT: "${MAIL_PORT:-587}"
+      MAIL_ENCRYPTION: "${MAIL_ENCRYPTION:-tls}"
+      MAIL_SMTP_AUTH: "${MAIL_SMTP_AUTH:-true}"
+      MAIL_USERNAME: "${MAIL_USERNAME:-}"
+      MAIL_PASSWORD: "${MAIL_PASSWORD:-}"
+      MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-noreply@example.com}"
+      MAIL_FROM_NAME: "${MAIL_FROM_NAME:-QRForge}"
     depends_on:
       qrforge-db:
         condition: service_healthy

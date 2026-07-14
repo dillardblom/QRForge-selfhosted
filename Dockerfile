@@ -95,6 +95,7 @@ RUN cp -R ./php-qrcode/src /var/www/html/
 
 WORKDIR /var/www/html
 RUN composer update
+RUN composer require phpmailer/phpmailer:^6.9
 COPY ./src ./
 RUN chmod 755 *;
 

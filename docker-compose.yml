@@ -15,6 +15,13 @@ services:
       DATABASE_PASSWORD: "${DATABASE_PASSWORD:?zet DATABASE_PASSWORD in .env}"
       DATABASE_PREFIX: "${DATABASE_PREFIX:-}"
       DATABASE_CHARSET: "${DATABASE_CHARSET:-utf8}"
+      ALLOW_SELF_REGISTRATION: "${ALLOW_SELF_REGISTRATION:-false}"
+      MAIL_HOST: "mailhog"
+      MAIL_PORT: "1025"
+      MAIL_ENCRYPTION: ""
+      MAIL_SMTP_AUTH: "false"
+      MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-noreply@example.com}"
+      MAIL_FROM_NAME: "${MAIL_FROM_NAME:-QRForge}"
     ports:
       - "80:80"
     depends_on:
@@ -22,6 +29,14 @@ services:
         condition: service_healthy
     volumes:
       - ./data/qrcode-storage:/var/www/qrcode-storage
+    networks:
+      - qrforge-network
+
+  mailhog:
+    image: "mailhog/mailhog:v1.0.1"
+    restart: "unless-stopped"
+    ports:
+      - "8025:8025" # web UI: http://localhost:8025
     networks:
       - qrforge-network
 

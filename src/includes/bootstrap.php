@@ -12,3 +12,4 @@ require_once __DIR__ . '/security.php';
 qr_session_start();
 qr_enforce_session_timeout();
 qr_enforce_password_change();
+qr_enforce_email_set();

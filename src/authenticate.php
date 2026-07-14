@@ -6,17 +6,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 {
 	csrf_verify_or_die();
 
-	$username = filter_input(INPUT_POST, 'username');
+	// Login moves from username to email. Accept either during the transition -
+	// existing pre-migration accounts have no email yet (see must_set_email/set_email.php),
+	// so a plain username must keep working until they've set one.
+	$identifier = filter_input(INPUT_POST, 'email');
 	$password = filter_input(INPUT_POST, 'password');
 	$remember = filter_input(INPUT_POST, 'remember');
 
-	if (!$username || !$password) {
-		$_SESSION['login_failure'] = 'Invalid username or password';
+	if (!$identifier || !$password) {
+		$_SESSION['login_failure'] = 'Invalid email or password';
 		header('Location: login.php');
 		exit;
 	}
 
-	if (qr_is_login_locked_out($username)) {
+	if (qr_is_login_locked_out($identifier)) {
 		$_SESSION['login_failure'] = 'Too many failed login attempts. Try again in 15 minutes.';
 		header('Location: login.php');
 		exit;
@@ -25,12 +28,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 	// Get DB instance.
 	$db = getDbInstance();
 
-	$db->where('username', $username);
+	$db->where('email', $identifier);
 	$row = $db->getOne('users');
+
+	if ($db->count < 1) {
+		// Compatibility fallback for accounts that haven't set an email yet.
+		$db = getDbInstance();
+		$db->where('username', $identifier);
+		$row = $db->getOne('users');
+	}
 
 	if ($db->count >= 1 && password_verify($password, $row['password']))
     {
-		qr_record_login_attempt($username, true);
+		qr_record_login_attempt($identifier, true);
 
 		// Voorkom session fixation: nieuwe sessie-id na een geslaagde login.
 		session_regenerate_id(true);
@@ -40,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         $_SESSION['user_id'] = $row['id'];
 		$_SESSION['username'] = $row['username'];
 		$_SESSION['must_change_password'] = !empty($row['must_change_password']);
+		$_SESSION['must_set_email'] = !empty($row['must_set_email']);
 		$_SESSION['can_view_static'] = !empty($row['can_view_static']);
 		$_SESSION['can_view_dynamic'] = !empty($row['can_view_dynamic']);
 		$_SESSION['scope_owner_id'] = qr_compute_scope_owner_id($row);
@@ -86,8 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 	}
     else
     {
-		qr_record_login_attempt($username, false);
-		$_SESSION['login_failure'] = 'Invalid username or password';
+		qr_record_login_attempt($identifier, false);
+		$_SESSION['login_failure'] = 'Invalid email or password';
 		header('Location: login.php');
 		exit;
 	}

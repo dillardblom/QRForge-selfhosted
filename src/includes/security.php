@@ -66,14 +66,37 @@ function qr_enforce_password_change() {
         return;
     }
 
+    // Also exempt set_email.php - an account can need both flows at once (e.g. a fresh
+    // self-registered row, or a pre-migration account that never set a password either),
+    // and each enforcer redirecting to its own page while blocking the other's would loop forever.
     $current_script = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH));
-    $exempt = ['change_password.php', 'logout.php'];
+    $exempt = ['change_password.php', 'set_email.php', 'logout.php'];
 
     if (in_array($current_script, $exempt, true)) {
         return;
     }
 
     header('Location: change_password.php');
+    exit;
+}
+
+/**
+ * Stuurt ingelogde gebruikers zonder e-mailadres naar set_email.php, behalve op de
+ * wijzigingspagina's zelf en logout.
+ */
+function qr_enforce_email_set() {
+    if (empty($_SESSION['user_logged_in']) || empty($_SESSION['must_set_email'])) {
+        return;
+    }
+
+    $current_script = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH));
+    $exempt = ['set_email.php', 'change_password.php', 'logout.php'];
+
+    if (in_array($current_script, $exempt, true)) {
+        return;
+    }
+
+    header('Location: set_email.php');
     exit;
 }
 
@@ -116,6 +139,18 @@ function csrf_verify_header_or_die() {
         echo json_encode(['data' => 'Invalid or missing CSRF token', 'status' => 403]);
         exit;
     }
+}
+
+/**
+ * Verifieert het antwoord op de zelf-gehoste CAPTCHA (captcha.php). Verbruikt het
+ * verwachte antwoord uit de sessie na de eerste check, zodat elke afbeelding maar
+ * eenmaal te gebruiken is (voorkomt hergebruik van hetzelfde plaatje/antwoord).
+ */
+function captcha_is_valid($submittedAnswer) {
+    $expected = $_SESSION['captcha_answer'] ?? null;
+    unset($_SESSION['captcha_answer']);
+
+    return $expected !== null && is_string($submittedAnswer) && hash_equals($expected, trim($submittedAnswer));
 }
 
 /**

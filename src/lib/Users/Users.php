@@ -1,5 +1,6 @@
 <?php
 require_once 'config/config.php';
+require_once BASE_PATH . '/lib/Mailer/Mailer.php';
 
 class Users
 {
@@ -137,7 +138,90 @@ class Users
 		    $this->success('User added successfully');
 	    }
     }
-    
+
+    /**
+     * Public self-registration (register.php). No session/permission checks - this is
+     * the one path where an unauthenticated visitor creates their own account. Always
+     * creates a free-forever 'admin' (self-scoped, no tenant), matching what a manually
+     * created OSS admin gets. Returns ['ok' => true] on success or
+     * ['ok' => false, 'error' => string] - callers are responsible for flash/redirect,
+     * unlike addUser()/editUser() which redirect themselves (this runs pre-login, on a
+     * page with its own layout).
+     */
+    public function registerSelfUser($email) {
+        if (!ALLOW_SELF_REGISTRATION) {
+            return ['ok' => false, 'error' => 'Self-registration is not enabled.'];
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['ok' => false, 'error' => 'Please enter a valid email address.'];
+        }
+
+        $db = getDbInstance();
+        $db->where('email', $email);
+        $existing = $db->getOne('users');
+
+        if (!empty($existing)) {
+            return ['ok' => false, 'error' => 'An account with this email already exists.'];
+        }
+
+        $username = $this->deriveUniqueUsername($email);
+        $tempPassword = bin2hex(random_bytes(8));
+
+        $data_to_db = [
+            'username' => $username,
+            'password' => password_hash($tempPassword, PASSWORD_DEFAULT),
+            'type' => 'admin',
+            'owner_admin_id' => null,
+            'email' => $email,
+            'must_change_password' => 1,
+            'self_registered_at' => date('Y-m-d H:i:s'),
+        ];
+
+        $db = getDbInstance();
+        $last_id = $db->insert('users', $data_to_db);
+
+        if (!$last_id) {
+            return ['ok' => false, 'error' => 'Could not create the account: ' . $db->getLastError()];
+        }
+
+        audit_log('user_self_registered', 'user', $last_id);
+
+        $mailer = new Mailer();
+        $mailer->sendInitialPassword($email, $tempPassword);
+
+        return ['ok' => true];
+    }
+
+    /**
+     * Derives a username candidate from the email's local part (letters/digits/dot/
+     * underscore/hyphen only, matching validateUsernameAndType()'s rules), appending a
+     * numeric suffix if it's already taken.
+     */
+    private function deriveUniqueUsername($email) {
+        $localPart = strtolower(strstr($email, '@', true) ?: $email);
+        $base = preg_replace('/[^a-z0-9._-]/', '', $localPart);
+        $base = substr($base, 0, 45) ?: 'user';
+
+        if (strlen($base) < 3) {
+            $base = str_pad($base, 3, '0');
+        }
+
+        $candidate = $base;
+        $suffix = 1;
+
+        $db = getDbInstance();
+        $db->where('username', $candidate);
+        while ($db->getOne('users') !== null) {
+            $candidate = $base . $suffix;
+            $suffix++;
+            $db = getDbInstance();
+            $db->where('username', $candidate);
+        }
+
+        return $candidate;
+    }
+
     /**
      * Edit user.
      *
