@@ -43,7 +43,8 @@ project by Giandonato Inverso, built on [AdminLTE](https://adminlte.io/).
 # What is included
 
 - PHP 8.4 application source
-- Database schema + migrations
+- Database schema + migrations (applied automatically on every container start,
+  so `git pull` + restart is enough to bring an existing install up to date)
 - Docker Compose files (dev and production)
 - CSS/JS assets
 

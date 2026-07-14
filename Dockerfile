@@ -97,11 +97,20 @@ WORKDIR /var/www/html
 RUN composer update
 RUN composer require phpmailer/phpmailer:^6.9
 COPY ./src ./
+COPY ./db/migrations ./db/migrations
 RUN chmod 755 *;
 
 # Qr code storage lives outside the document root so files can only be reached through
 # the authenticated qrcode_image.php / qrcode_zip_download.php endpoints.
 RUN mkdir -p /var/www/qrcode-storage/zip && chmod -R 777 /var/www/qrcode-storage
+
+# Applies any not-yet-applied db/migrations/*.sql on every container start (see
+# src/scripts/migrate.php) - docker-entrypoint-initdb.d only runs db/init.sql, and only
+# on a brand new volume, so without this an existing install's schema silently falls
+# behind the code on every `git pull` + restart.
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 EXPOSE 80
 CMD ["php", "-S", "0.0.0.0:80"]

@@ -51,7 +51,9 @@ RUN cp -R ./php-qrcode/src /var/www/html/
 
 WORKDIR /var/www/html
 RUN composer update
+RUN composer require phpmailer/phpmailer:^6.9
 COPY ./src ./
+COPY ./db/migrations ./db/migrations
 RUN chown -R www-data:www-data /var/www/html \
     && find /var/www/html -type f -exec chmod 644 {} \; \
     && find /var/www/html -type d -exec chmod 755 {} \;
@@ -61,6 +63,14 @@ RUN chown -R www-data:www-data /var/www/html \
 RUN mkdir -p /var/www/qrcode-storage/zip \
     && chown -R www-data:www-data /var/www/qrcode-storage \
     && chmod -R 775 /var/www/qrcode-storage
+
+# Applies any not-yet-applied db/migrations/*.sql on every container start (see
+# src/scripts/migrate.php) - docker-entrypoint-initdb.d only runs db/init.sql, and only
+# on a brand new volume, so without this an existing install's schema silently falls
+# behind the code on every `git pull` + restart.
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 EXPOSE 9000
 CMD ["php-fpm"]
