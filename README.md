@@ -8,8 +8,8 @@ of the original [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-D
 project by Giandonato Inverso, built on [AdminLTE](https://adminlte.io/).
 
 - **Try it free:** [qr.ensembia.com](https://qr.ensembia.com) - fully functional OSS test
-  instance. Self-service signup isn't live yet, so log in with the temporary shared demo
-  account `admin` / `admin` in the meantime.
+  instance. [Register your own free account](https://qr.ensembia.com/register.php)
+  (email + a self-hosted CAPTCHA, no third-party service) - no shared demo login needed.
 - **Commercial VIP edition:** the ability to give sub-users the ability to create
   QR codes as well, from their own (sub)account. If you have a bigger organisation,
   having more users being able to create new QR codes delegates your workload. To

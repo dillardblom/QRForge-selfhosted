@@ -51,8 +51,9 @@ require_once BASE_PATH . '/includes/auth_validate.php';
                         This is the free, open-source (MIT) edition of QRForge. It runs unmodified
                         as a live, fully functional try-out at
                         <a href="https://qr.ensembia.com" target="_blank">qr.ensembia.com</a> -
-                        self-service signup isn't live yet, so log in with the temporary shared
-                        demo account <code>admin</code> / <code>admin</code> in the meantime.
+                        <a href="https://qr.ensembia.com/register.php" target="_blank">register your
+                        own free account</a> there (email + a self-hosted CAPTCHA, no third-party
+                        service).
                     </p>
                     <p>
                         The commercial VIP edition (paid create-rights and logo-embedded QR codes)

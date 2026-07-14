@@ -19,14 +19,20 @@ CREATE TABLE IF NOT EXISTS `users` (
   `can_view_static` tinyint(1) NOT NULL DEFAULT 0,
   `can_view_dynamic` tinyint(1) NOT NULL DEFAULT 0,
   `owner_admin_id` int(25) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `must_set_email` tinyint(1) NOT NULL DEFAULT 0,
+  `self_registered_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`)
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
 -- Default super admin account. Credentials: superadmin / superadmin
 -- must_change_password=1 forces a password change on first login (see Fase 1 hardening).
-INSERT INTO `users` (`id`, `username`, `password`, `series_id`, `remember_token`, `expires`, `type`, `must_change_password`, `password_changed_at`) VALUES
-(1, 'superadmin', '$2y$10$xpZc5KC.aU2XHkcqhuZGFuAnqmtL4Unt8MysOyylceq.19XIyoZpG', NULL, NULL, NULL, 'super', 1, NULL);
+-- must_set_email=1: no email yet, so login falls back to username until it's set (same
+-- one-time interstitial pre-migration accounts get - see set_email.php).
+INSERT INTO `users` (`id`, `username`, `password`, `series_id`, `remember_token`, `expires`, `type`, `must_change_password`, `password_changed_at`, `must_set_email`) VALUES
+(1, 'superadmin', '$2y$10$xpZc5KC.aU2XHkcqhuZGFuAnqmtL4Unt8MysOyylceq.19XIyoZpG', NULL, NULL, NULL, 'super', 1, NULL, 1);
 
 CREATE TABLE IF NOT EXISTS `dynamic_qrcodes` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
