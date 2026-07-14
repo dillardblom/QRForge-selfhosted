@@ -9,7 +9,7 @@ $users = new Users();
 if (!in_array($_SESSION['type'], ['super', 'admin'], true))
     $users->failure('Only "super admin" and "admin" accounts can access the user management page', 'Location: index.php');
 
-$select = array('id', 'username', 'type');
+$select = array('id', 'username', 'email', 'type');
 $search_fields = array('username');
 require_once BASE_PATH . '/includes/search_order.php';
 $page = filter_input(INPUT_GET, 'page', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? 1;

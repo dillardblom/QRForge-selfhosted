@@ -14,6 +14,20 @@
 
     <div class="col-sm-4">
         <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                </div>
+
+                <input type="email" name="email" placeholder="Email" class="form-control" value="<?php echo ($edit) ? htmlspecialchars($user['email'] ?? '', ENT_QUOTES, 'UTF-8') : ''; ?>" autocomplete="off">
+            </div>
+            <small class="form-text text-muted">Used to log in once set. Leave blank to prompt for it on next login.</small>
+        </div>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="form-group">
             <label for="password">Password *</label>
             <div class="input-group">
                 <div class="input-group-prepend">

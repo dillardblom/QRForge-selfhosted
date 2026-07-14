@@ -33,6 +33,23 @@ class Users
     }
 
     /**
+     * Server-side validation of the (optional, for admin-created accounts) email address.
+     * Empty is allowed here - an account without one gets must_set_email=1, same as a
+     * pre-migration legacy account (see the callers below).
+     */
+    private function validateEmail($email) {
+        if ($email === '' || $email === null) {
+            return null;
+        }
+
+        if (!is_string($email) || strlen($email) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return 'Please enter a valid email address.';
+        }
+
+        return null;
+    }
+
+    /**
      *
      */
     public function __destruct()
@@ -114,11 +131,19 @@ class Users
             $this->failure($validation_error, 'Location: user.php');
         }
 
+        $email = trim($input_data['email'] ?? '');
+        $email_error = $this->validateEmail($email);
+        if ($email_error !== null) {
+            $this->failure($email_error, 'Location: user.php');
+        }
+
         if (!isset($input_data['password']) || strlen($input_data['password']) < 10) {
             $this->failure('Password must be at least 10 characters long.', 'Location: user.php');
         }
 
         $data_to_db["username"] = $input_data["username"];
+        $data_to_db["email"] = $email !== '' ? $email : null;
+        $data_to_db['must_set_email'] = $email === '' ? 1 : 0;
         $data_to_db['password'] = password_hash($input_data['password'], PASSWORD_DEFAULT);
         $data_to_db["type"] = $requested_type;
         $data_to_db['owner_admin_id'] = $owner_admin_id;
@@ -131,6 +156,16 @@ class Users
         if ($db->count >= 1)
             $this->failure('Username already exists');
 
+        if ($email !== '') {
+            $db = getDbInstance();
+            $db->where('email', $email);
+            $db->get('users');
+
+            if ($db->count >= 1)
+                $this->failure('An account with this email already exists', 'Location: user.php');
+        }
+
+        $db = getDbInstance();
 	    $last_id = $db->insert('users', $data_to_db);
 
 	    if ($last_id) {
@@ -258,6 +293,12 @@ class Users
             $this->failure($validation_error, 'Location: user.php?'.$query_string);
         }
 
+        $email = trim($input_data['email'] ?? '');
+        $email_error = $this->validateEmail($email);
+        if ($email_error !== null) {
+            $this->failure($email_error, 'Location: user.php?'.$query_string);
+        }
+
         if (isset($input_data['password']) && strlen($input_data['password']) > 0 && strlen($input_data['password']) < 10) {
             $this->failure('Password must be at least 10 characters long.', 'Location: user.php?'.$query_string);
         }
@@ -271,8 +312,25 @@ class Users
             $this->failure('Username already exists', 'Location: user.php?'.$query_string);
         }
 
+        if ($email !== '') {
+            $db = getDbInstance();
+            $db->where('email', $email);
+            $db->where('id', $input_data["id"], '!=');
+            $row = $db->getOne('users');
+
+            if (!empty($row['email'])) {
+                $this->failure('An account with this email already exists', 'Location: user.php?'.$query_string);
+            }
+        }
+
         $data_to_db["username"] = $input_data["username"];
         $data_to_db["type"] = $requested_type;
+        // Only touch email/must_set_email if an email was actually submitted - an admin
+        // leaving the field blank on an already-set account shouldn't wipe it back out.
+        if ($email !== '') {
+            $data_to_db['email'] = $email;
+            $data_to_db['must_set_email'] = 0;
+        }
         $data_to_db['can_view_static'] = !empty($input_data['can_view_static']) ? 1 : 0;
         $data_to_db['can_view_dynamic'] = !empty($input_data['can_view_dynamic']) ? 1 : 0;
 

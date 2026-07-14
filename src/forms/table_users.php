@@ -6,8 +6,9 @@
         <thead>
             <tr>
                 <th width="5%">ID</th>
-                <th width="45%">Username</th>
-                <th width="40%">Type</th>
+                <th width="25%">Username</th>
+                <th width="30%">Email</th>
+                <th width="30%">Type</th>
                 <th width="10%">Actions</th>
             </tr>
         </thead>
@@ -16,6 +17,7 @@
             <tr>
                 <td><?php echo $row['id']; ?></td>
                 <td><?php echo htmlspecialchars($row['username']); ?></td>
+                <td><?php echo htmlspecialchars($row['email'] ?? ''); ?></td>
                 <td><?php echo htmlspecialchars($row['type']); ?></td>
                 <td>
                     <!-- EDIT -->

@@ -16,10 +16,17 @@ services:
       DATABASE_PREFIX: "${DATABASE_PREFIX:-}"
       DATABASE_CHARSET: "${DATABASE_CHARSET:-utf8}"
       ALLOW_SELF_REGISTRATION: "${ALLOW_SELF_REGISTRATION:-false}"
-      MAIL_HOST: "mailhog"
-      MAIL_PORT: "1025"
-      MAIL_ENCRYPTION: ""
-      MAIL_SMTP_AUTH: "false"
+      # This file is also what vm420 runs in production (not docker-compose.prod.yml -
+      # see the "prod" naming is misleading, this is the actually-deployed one). Defaults
+      # here are dev-convenience only (mailhog, no auth) - a real deployment's .env must
+      # override MAIL_HOST/MAIL_SMTP_AUTH/MAIL_USERNAME/MAIL_PASSWORD explicitly, same as
+      # DATABASE_PASSWORD above already requires.
+      MAIL_HOST: "${MAIL_HOST:-mailhog}"
+      MAIL_PORT: "${MAIL_PORT:-1025}"
+      MAIL_ENCRYPTION: "${MAIL_ENCRYPTION:-}"
+      MAIL_SMTP_AUTH: "${MAIL_SMTP_AUTH:-false}"
+      MAIL_USERNAME: "${MAIL_USERNAME:-}"
+      MAIL_PASSWORD: "${MAIL_PASSWORD:-}"
       MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-noreply@example.com}"
       MAIL_FROM_NAME: "${MAIL_FROM_NAME:-QRForge}"
     ports:
