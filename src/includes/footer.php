@@ -9,7 +9,7 @@
     <strong><a href="https://www.qrforge.eu" target="_blank">QRForge</a></strong> -
     <a href="./about.php">About</a> / credits
     <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 3.0
+      <b>Version</b> 3.0-beta-3
     </div>
   </footer>
 </div>

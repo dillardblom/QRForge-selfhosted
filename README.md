@@ -3,9 +3,12 @@
 <p align="center"><strong>Self-hosted, open-source QR code generator.</strong></p>
 
 **QRForge** creates and manages static and dynamic QR codes from a clean,
-responsive control panel. It's a security-hardened, actively maintained fork
-of the great but abandoned original [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code)
-project by Giandonato Inverso, built on [AdminLTE](https://adminlte.io/).
+responsive control panel, built on [AdminLTE](https://adminlte.io/).
+It started as a fork of [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code)
+by Giandonato Inverso, but has since had its database schema, QR generation
+pipeline and most of its codebase rewritten, so it's now maintained as an
+independent project. Our thanks to Giandonato for the original idea and
+groundwork.
 
 - **Try it free:** [qr.ensembia.com](https://qr.ensembia.com) - fully functional OSS test
   instance. [Register your own free account](https://qr.ensembia.com/register.php)
@@ -65,11 +68,13 @@ For a production deployment behind a reverse proxy, use
 
 # Credits
 
-- Originally forked from [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code)
-  by Giandonato Inverso.
+- Started as a fork of [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code)
+  by Giandonato Inverso, since rewritten into an independent project.
 - QR code rendering powered by [chillerlan/php-qrcode](https://github.com/chillerlan/php-qrcode).
 - Admin panel UI built on [AdminLTE](https://adminlte.io/).
 
 # License
 
 MIT - see [LICENSE](LICENSE).
+
+"QR Code" is a registered trademark of DENSO WAVE INCORPORATED.

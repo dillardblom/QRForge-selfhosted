@@ -38,7 +38,7 @@ require_once BASE_PATH . '/includes/auth_validate.php';
             <div class="card card-primary">
                 <div class="card-body text-center">
                     <img src="dist/img/brand/logo-stacked.svg" alt="QRForge" style="max-width: 220px; margin: 20px 0;">
-                    <p class="text-muted">Self-hosted static and dynamic QR code generator. Version 3.0.</p>
+                    <p class="text-muted">Self-hosted static and dynamic QR code generator. Version 3.0-beta-3.</p>
                 </div>
             </div>
 
@@ -83,13 +83,19 @@ require_once BASE_PATH . '/includes/auth_validate.php';
                 </div>
                 <div class="card-body">
                     <p>
-                        Originally forked from
-                        <a href="https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code" target="_blank">PHP Qrcode Generator by Giandonato Inverso</a>.
+                        Started as a fork of
+                        <a href="https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code" target="_blank">PHP Qrcode Generator by Giandonato Inverso</a>,
+                        since rewritten (database schema, QR generation pipeline, most of the
+                        codebase) into an independent project. Our thanks to Giandonato for the
+                        original idea and groundwork.
                     </p>
                     <p>
                         QR code rendering is powered by the
                         <a href="https://github.com/chillerlan/php-qrcode" target="_blank">chillerlan/php-qrcode</a>
                         library.
+                    </p>
+                    <p class="text-muted small">
+                        "QR Code" is a registered trademark of DENSO WAVE INCORPORATED.
                     </p>
                 </div>
             </div>
