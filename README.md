@@ -4,7 +4,7 @@
 
 **QRForge** creates and manages static and dynamic QR codes from a clean,
 responsive control panel. It's a security-hardened, actively maintained fork
-of the original [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code)
+of the great but abandoned original [PHP Dynamic Qr code](https://github.com/giandonatoinverso/PHP-Dynamic-Qr-code)
 project by Giandonato Inverso, built on [AdminLTE](https://adminlte.io/).
 
 - **Try it free:** [qr.ensembia.com](https://qr.ensembia.com) - fully functional OSS test
