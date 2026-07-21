@@ -7,7 +7,7 @@
   <link rel="icon" href="dist/img/brand/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="dist/img/brand/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="dist/img/brand/favicon-16.png" sizes="16x16" type="image/png">
-  <link rel="apple-touch-icon" href="dist/img/brand/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="dist/img/brand/apple-touch-icon.png?v=2">
 
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
