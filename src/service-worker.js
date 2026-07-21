@@ -1,7 +1,7 @@
 // Minimal service worker: only makes the app installable and caches truly static
 // assets. Deliberately never caches PHP pages or the presets/bulk_action/qrcode_image
 // endpoints - those carry session-specific and CSRF-sensitive content.
-const CACHE_NAME = 'qrcode-static-v1';
+const CACHE_NAME = 'qrcode-static-v2';
 const STATIC_ASSET_PATTERN = /\.(css|js|png|jpg|jpeg|svg|gif|woff2?|ttf)$/;
 
 self.addEventListener('install', function (event) {
@@ -9,7 +9,16 @@ self.addEventListener('install', function (event) {
 });
 
 self.addEventListener('activate', function (event) {
-    event.waitUntil(self.clients.claim());
+    event.waitUntil(
+        caches.keys().then(function (keys) {
+            return Promise.all(
+                keys.filter(function (key) { return key !== CACHE_NAME; })
+                    .map(function (key) { return caches.delete(key); })
+            );
+        }).then(function () {
+            return self.clients.claim();
+        })
+    );
 });
 
 self.addEventListener('fetch', function (event) {
